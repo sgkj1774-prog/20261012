@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layoutRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="8dp"
+    android:background="@drawable/bg_cat_food_normal"
+    android:padding="14dp"
+    android:elevation="1dp">
+
+    <!-- 顶栏：品牌 + 状态标签 + 删除图标 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="6dp"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/textBrand"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="15sp"
+            android:textColor="#333333"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+        <TextView
+            android:id="@+id/textType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="干粮"
+            android:textSize="12sp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp"
+            android:textColor="#FFFFFF"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/score_bg"/>
+        <TextView
+            android:id="@+id/textStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="进行中"
+            android:textSize="12sp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/score_bg"/>
+        <TextView
+            android:id="@+id/textDeleteIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🗑"
+            android:textSize="18sp"
+            android:padding="4dp"
+            android:layout_marginStart="6dp"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <!-- 日期区间 + 持续天数 -->
+    <TextView
+        android:id="@+id/textDateRange"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📅 2026-01-01 开始 · 已持续 1 天"
+        android:textSize="13sp"
+        android:textColor="#999999"/>
+
+    <!-- 备注 -->
+    <TextView
+        android:id="@+id/textNotes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="12sp"
+        android:textColor="#BBBBBB"
+        android:layout_marginTop="4dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:visibility="gone"/>
+</LinearLayout>

@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="14dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:gravity="center_vertical">
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:text="←"
+            android:textSize="22sp"
+            android:background="@android:color/transparent"
+            android:textColor="#333333"/>
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🐱 添加猫咪如厕记录"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:gravity="center"/>
+        <View android:layout_width="42dp" android:layout_height="1dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 日期时间 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <Button
+                    android:id="@+id/btnDate"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="📅 日期"
+                    android:textSize="15sp"
+                    android:backgroundTint="#795548"
+                    android:layout_marginEnd="8dp"/>
+                <Button
+                    android:id="@+id/btnTime"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="🕐 时间"
+                    android:textSize="15sp"
+                    android:backgroundTint="#795548"/>
+            </LinearLayout>
+
+            <!-- 当日猫粮（与猫粮记录关联，点击可进入猫粮管理） -->
+            <TextView
+                android:id="@+id/tvCurrentFood"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:background="@drawable/bg_cat_food_current"
+                android:text="🍚 当日猫粮：暂无记录（点击管理猫粮）"
+                android:textSize="13sp"
+                android:textColor="#388E3C"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- 所属成员 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="所属成员"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <Spinner
+                android:id="@+id/spinnerUser"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/spinner_bg"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- 如厕意愿 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="如厕意愿"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <Button
+                    android:id="@+id/btnWillGood"
+                    android:layout_width="0dp" android:layout_height="50dp"
+                    android:layout_weight="1" android:text="主动叫唤（好）"
+                    android:textSize="12sp" android:layout_marginEnd="6dp"/>
+                <Button
+                    android:id="@+id/btnWillMid"
+                    android:layout_width="0dp" android:layout_height="50dp"
+                    android:layout_weight="1" android:text="被动抱走（中）"
+                    android:textSize="12sp" android:layout_marginEnd="6dp"/>
+                <Button
+                    android:id="@+id/btnWillBad"
+                    android:layout_width="0dp" android:layout_height="50dp"
+                    android:layout_weight="1" android:text="甩屎（差）"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+
+            <!-- 如厕过程 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="如厕过程"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <Button
+                    android:id="@+id/btnProcGood"
+                    android:layout_width="0dp" android:layout_height="50dp"
+                    android:layout_weight="1" android:text="进盆就拉（好）"
+                    android:textSize="12sp" android:layout_marginEnd="6dp"/>
+                <Button
+                    android:id="@+id/btnProcMid"
+                    android:layout_width="0dp" android:layout_height="50dp"
+                    android:layout_weight="1" android:text="进进出出再拉（中）"
+                    android:textSize="12sp" android:layout_marginEnd="6dp"/>
+                <Button
+                    android:id="@+id/btnProcBad"
+                    android:layout_width="0dp" android:layout_height="50dp"
+                    android:layout_weight="1" android:text="进盆再逃走（差）"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+
+            <!-- 粪便评分 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="粪便评分（1-5）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
+                <Button
+                    android:id="@+id/btnScore1"
+                    android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"
+                    android:text="1\n便秘" android:textSize="12sp" android:layout_marginEnd="4dp"
+                    android:backgroundTint="#E53935"/>
+                <Button
+                    android:id="@+id/btnScore2"
+                    android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"
+                    android:text="2\n略干" android:textSize="12sp" android:layout_marginEnd="4dp"
+                    android:backgroundTint="#FF9800"/>
+                <Button
+                    android:id="@+id/btnScore3"
+                    android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"
+                    android:text="3\n正常" android:textSize="12sp" android:layout_marginEnd="4dp"
+                    android:backgroundTint="#4CAF50"/>
+                <Button
+                    android:id="@+id/btnScore4"
+                    android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"
+                    android:text="4\n略软" android:textSize="12sp" android:layout_marginEnd="4dp"
+                    android:backgroundTint="#FFEB3B"/>
+                <Button
+                    android:id="@+id/btnScore5"
+                    android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"
+                    android:text="5\n腹泻" android:textSize="12sp"
+                    android:backgroundTint="#E53935"/>
+            </LinearLayout>
+            <TextView
+                android:id="@+id/textScoreDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="请选择评分"
+                android:textSize="13sp"
+                android:textColor="#666666"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- 粪便数量 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="粪便数量（颗）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+                <Button
+                    android:id="@+id/btnCountMinus"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:text="-"
+                    android:textSize="24sp"
+                    android:backgroundTint="#E0E0E0"
+                    android:textColor="#666666"/>
+                <TextView
+                    android:id="@+id/textStoolCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="8 颗"
+                    android:textSize="28sp"
+                    android:textColor="#212121"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+                <Button
+                    android:id="@+id/btnCountPlus"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:text="+"
+                    android:textSize="24sp"
+                    android:backgroundTint="#E0E0E0"
+                    android:textColor="#666666"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <Button
+                    android:id="@+id/btnCount4"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:text="4"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#EEEEEE"
+                    android:textColor="#666666"/>
+                <Button
+                    android:id="@+id/btnCount6"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:text="6"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#EEEEEE"
+                    android:textColor="#666666"/>
+                <Button
+                    android:id="@+id/btnCount8"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:text="8"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#4CAF50"
+                    android:textColor="#FFFFFF"/>
+                <Button
+                    android:id="@+id/btnCount10"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:text="10"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="4dp"
+                    android:backgroundTint="#EEEEEE"
+                    android:textColor="#666666"/>
+                <Button
+                    android:id="@+id/btnCount12"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:text="12"
+                    android:textSize="14sp"
+                    android:backgroundTint="#EEEEEE"
+                    android:textColor="#666666"/>
+            </LinearLayout>
+
+            <!-- 备注 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="备注（可选）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editNotes"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="其他补充..."
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:textSize="15sp"
+                android:gravity="top"
+                android:layout_marginBottom="20dp"/>
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="💾 保存记录"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:backgroundTint="#795548"/>
+
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="🗑 删除记录"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#F44336"
+                android:textColor="#FFFFFF"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="20dp"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

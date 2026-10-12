@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="14dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:gravity="center_vertical">
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:text="←"
+            android:textSize="22sp"
+            android:background="@android:color/transparent"
+            android:textColor="#333333"/>
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🏃 添加运动记录"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:gravity="center"/>
+        <View android:layout_width="42dp" android:layout_height="1dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 日期时间 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <Button
+                    android:id="@+id/btnDate"
+                    android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="1"
+                    android:text="📅 日期" android:textSize="15sp"
+                    android:backgroundTint="#FF5722" android:layout_marginEnd="8dp"/>
+                <Button
+                    android:id="@+id/btnTime"
+                    android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="1"
+                    android:text="🕐 时间" android:textSize="15sp"
+                    android:backgroundTint="#FF5722"/>
+            </LinearLayout>
+
+            <!-- 运动类型 -->
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="运动类型" android:textSize="13sp" android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="12dp">
+                <Button
+                    android:id="@+id/btnRunning"
+                    android:layout_width="0dp" android:layout_height="50dp"
+                    android:layout_weight="1" android:text="🏃 跑步"
+                    android:textSize="15sp" android:layout_marginEnd="8dp"/>
+                <Button
+                    android:id="@+id/btnHiking"
+                    android:layout_width="0dp" android:layout_height="50dp"
+                    android:layout_weight="1" android:text="🥾 徒步"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+            <!-- 距离 + 时长 -->
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="8dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="距离 (km)" android:textSize="13sp" android:textColor="#999999" android:layout_marginBottom="4dp"/>
+                    <EditText android:id="@+id/editDistance" android:layout_width="match_parent"
+                        android:layout_height="50dp" android:hint="如：5.0"
+                        android:background="@android:color/white" android:paddingHorizontal="12dp"
+                        android:textSize="15sp" android:inputType="numberDecimal"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="时长 (分钟)" android:textSize="13sp" android:textColor="#999999" android:layout_marginBottom="4dp"/>
+                    <EditText android:id="@+id/editDuration" android:layout_width="match_parent"
+                        android:layout_height="50dp" android:hint="如：30"
+                        android:background="@android:color/white" android:paddingHorizontal="12dp"
+                        android:textSize="15sp" android:inputType="number"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 心率 + 卡路里（跑步显示） -->
+            <LinearLayout
+                android:id="@+id/layoutRunning"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="8dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="心率 (bpm, 可选)" android:textSize="13sp" android:textColor="#999999" android:layout_marginBottom="4dp"/>
+                    <EditText android:id="@+id/editHeartRate" android:layout_width="match_parent"
+                        android:layout_height="50dp" android:hint="如：150"
+                        android:background="@android:color/white" android:paddingHorizontal="12dp"
+                        android:textSize="15sp" android:inputType="number"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="卡路里 (kcal, 可选)" android:textSize="13sp" android:textColor="#999999" android:layout_marginBottom="4dp"/>
+                    <EditText android:id="@+id/editCalories" android:layout_width="match_parent"
+                        android:layout_height="50dp" android:hint="自动估算"
+                        android:background="@android:color/white" android:paddingHorizontal="12dp"
+                        android:textSize="15sp" android:inputType="number"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 爬升（徒步显示） -->
+            <LinearLayout
+                android:id="@+id/layoutHiking"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginBottom="12dp"
+                android:visibility="gone">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="爬升高度 (米, 可选)" android:textSize="13sp" android:textColor="#999999"
+                    android:layout_marginBottom="4dp"/>
+                <EditText android:id="@+id/editElevation" android:layout_width="match_parent"
+                    android:layout_height="50dp" android:hint="如：300"
+                    android:background="@android:color/white" android:paddingHorizontal="12dp"
+                    android:textSize="15sp" android:inputType="number"/>
+            </LinearLayout>
+
+            <!-- 难度 -->
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="难度等级" android:textSize="13sp" android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="4dp">
+                <Button android:id="@+id/btnDiff1" android:layout_width="0dp" android:layout_height="44dp"
+                    android:layout_weight="1" android:text="⭐" android:textSize="18sp"
+                    android:layout_marginEnd="4dp" android:backgroundTint="#BDBDBD"/>
+                <Button android:id="@+id/btnDiff2" android:layout_width="0dp" android:layout_height="44dp"
+                    android:layout_weight="1" android:text="⭐⭐" android:textSize="18sp"
+                    android:layout_marginEnd="4dp" android:backgroundTint="#BDBDBD"/>
+                <Button android:id="@+id/btnDiff3" android:layout_width="0dp" android:layout_height="44dp"
+                    android:layout_weight="1" android:text="⭐⭐⭐" android:textSize="18sp"
+                    android:layout_marginEnd="4dp" android:backgroundTint="#FF9800"/>
+                <Button android:id="@+id/btnDiff4" android:layout_width="0dp" android:layout_height="44dp"
+                    android:layout_weight="1" android:text="⭐⭐⭐⭐" android:textSize="18sp"
+                    android:layout_marginEnd="4dp" android:backgroundTint="#BDBDBD"/>
+                <Button android:id="@+id/btnDiff5" android:layout_width="0dp" android:layout_height="44dp"
+                    android:layout_weight="1" android:text="⭐⭐⭐⭐⭐" android:textSize="18sp"
+                    android:backgroundTint="#BDBDBD"/>
+            </LinearLayout>
+            <TextView
+                android:id="@+id/textDiffDesc" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="中等" android:textSize="13sp" android:textColor="#666666"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- 地点 -->
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="地点（可选）" android:textSize="13sp" android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText android:id="@+id/editLocation"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="如：滨江公园、跑步机"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:textSize="15sp"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- 备注 -->
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="备注（可选）" android:textSize="13sp" android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText android:id="@+id/editNotes"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="路线/天气/感受..."
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:textSize="15sp"
+                android:gravity="top"
+                android:layout_marginBottom="20dp"/>
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="💾 保存记录"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:backgroundTint="#FF5722"/>
+
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="🗑 删除记录"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#F44336"
+                android:textColor="#FFFFFF"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="20dp"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

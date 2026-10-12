@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <!-- 列表（RecyclerView + 编辑切换按钮） -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="4dp"/>
+
+    <!-- 空状态 -->
+    <TextView
+        android:id="@+id/tvEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="暂无记录\n点击右上角添加"
+        android:textSize="15sp"
+        android:textColor="#BBBBBB"
+        android:visibility="gone"/>
+
+    <!-- 编辑/删除切换按钮（浮动在右下角上方） -->
+    <LinearLayout
+        android:id="@+id/btnEditToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        android:background="@drawable/spinner_bg"
+        android:elevation="4dp"
+        android:padding="4dp">
+
+        <Button
+            android:id="@+id/btnEditMode"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="✏️ 编辑"
+            android:textSize="13sp"
+            android:backgroundTint="#607D8B"
+            android:paddingHorizontal="12dp"
+            android:layout_marginEnd="4dp"/>
+
+        <Button
+            android:id="@+id/btnDeleteMode"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="🗑 删除"
+            android:textSize="13sp"
+            android:backgroundTint="#F44336"
+            android:paddingHorizontal="12dp"/>
+    </LinearLayout>
+
+</FrameLayout>

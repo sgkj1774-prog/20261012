@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- 顶部栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="14dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:gravity="center_vertical">
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:text="←"
+            android:textSize="22sp"
+            android:background="@android:color/transparent"
+            android:textColor="#333333"/>
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🍚 添加猫粮记录"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:gravity="center"/>
+        <View
+            android:layout_width="42dp"
+            android:layout_height="1dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 当前猫粮提示（与猫如厕关联） -->
+            <TextView
+                android:id="@+id/tvCurrentFood"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:background="@drawable/bg_cat_food_current"
+                android:text="🐱 当前在吃：--"
+                android:textSize="13sp"
+                android:textColor="#388E3C"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"/>
+
+            <!-- 品牌 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="品牌型号 *"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <EditText
+                android:id="@+id/editBrand"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="如：渴望六种鱼"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:textSize="15sp"
+                android:singleLine="true"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- 类型 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="类型"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <Spinner
+                android:id="@+id/spinnerType"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/spinner_bg"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- 开始日期 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="开始日期（开始喂这款粮的日期）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <Button
+                android:id="@+id/btnStartDate"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="📅 选择开始日期"
+                android:textSize="15sp"
+                android:backgroundTint="#795548"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- 持续时长 -->
+            <TextView
+                android:id="@+id/tvDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⏱ 持续中 · 已喂 1 天"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#4CAF50"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- 结束日期（换粮时才填） -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="结束日期（可选，换粮了才填）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:id="@+id/tvEndDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="未设置（当前在吃）"
+                    android:textSize="14sp"
+                    android:textColor="#666666"/>
+                <Button
+                    android:id="@+id/btnClearEnd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="清除"
+                    android:textSize="13sp"
+                    android:backgroundTint="#E0E0E0"
+                    android:textColor="#666666"
+                    android:visibility="gone"/>
+            </LinearLayout>
+            <Button
+                android:id="@+id/btnChangeFood"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="🔄 换粮了（选择结束日期）"
+                android:textSize="15sp"
+                android:backgroundTint="#FF9800"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- 备注 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="备注（可选）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <EditText
+                android:id="@+id/editNotes"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:hint="如：适口性、软便情况、换粮原因..."
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:textSize="15sp"
+                android:gravity="top"
+                android:layout_marginBottom="20dp"/>
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="💾 保存记录"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:backgroundTint="#4CAF50"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

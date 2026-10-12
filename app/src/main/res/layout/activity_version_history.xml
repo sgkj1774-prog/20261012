@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- 顶栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="14dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:gravity="center_vertical">
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@android:color/transparent"
+            android:text="←"
+            android:textSize="20sp"
+            android:textColor="#666666"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="版本记录"
+            android:textSize="18sp"
+            android:textColor="#212121"
+            android:textStyle="bold"
+            android:gravity="center"/>
+        <View
+            android:layout_width="42dp"
+            android:layout_height="42dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.4.8"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-09-11"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 运动统计：移除本周徒步，新增本月跑步总里程与时长汇总\n• 主页趋势图：支持双指缩放高密度数据，点击数据点显示详情\n• 主页日历：点击日期可查看该日所有类型记录详情\n• 日详情页整合健康/运动/刷牙/呼吸/事项/猫咪/读书共7类数据"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.4.7"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-08-04"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 主页按钮「👥」→「💪 健康记录」，跳转历史健康记录列表\n• 数据管理新增成员管理入口\n• 呼吸打卡右上角菜单改为「📊 统计」\n• 运动/猫咪/刷牙列表页布局修复，解决闪退问题"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.4.6"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-08-03"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 读书笔记：读完时归档页数和读后感绑定保存，状态切换时自动固化\n• 读书笔记已读卡片显示「读完于第 X 页」及归档读后感\n• 读书笔记新增 📊 数据统计入口（总/在读/已读/想读、均分、总页数）\n• 数据管理新增数据重置功能（双重确认）\n• 数据库升级至 v11"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.4.5"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-08-03"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 重要事项支持导入（修复解析逻辑：优先级/状态/重复类型支持中文）\n• 读书笔记支持导入（修复解析逻辑：读书状态支持中文）\n• 重要事项列表页新增 📊 统计入口（总事项数、待办/已完成/已取消分布、优先级/重复类型分布）\n• 主页今日健康记录展示上限调整为 3 条"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.4.4"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-31"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 导出/导入支持呼吸打卡、重要事项、读书笔记、猫粮记录（共9种数据段）\n• 猫菜单优化：移除编辑/删除按钮，新增「统计」按钮一键跳转统计页\n• 主页日历最后一排对齐修复\n• 主页体重趋势图兼容修复（ColorOS设备崩溃修复）"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.4.0"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-27"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 新增呼吸打卡模块（呼吸时长、评分星级、打卡模式）\n• 新增重要事项模块（提醒设置、优先级、重复类型）\n• 新增读书笔记模块（阅读进度、星级评分、读书状态）\n• 主页新增体重+运动量趋势曲线图\n• 主页新增日历视图（有数据日期标记绿色圆点）\n• 架构升级：HealthRepository 单例代理全部 CRUD，数据层统一入口"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.3.2"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-24"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 主页历史记录列表 UI 优化：日期改为相对格式（今天/昨天/MM-dd）+ 时间显示、左侧状态色条（绿色正常/橙色偏高/红色异常）、体重 18sp 加粗主视觉、行高收紧\n• 体重等健康数据显示从 1 位小数提升为 2 位小数"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.3.1"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-24"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 修复运动记录添加时提示「保存失败」的BUG（数据库版本号遗漏导致旧库缺少 location 字段）"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.3"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-23"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 主页顶部按钮统一五等分（猫拉屎 / 猫刷牙 / 运动 / 成员 / 版本），文字不换行
+• 主页FAB独立可拖拽，绿色50%透明度，拖动不越界消失
+• 刷牙统计改为「本月刷牙次数」和「本年累计刷牙」两个汇总卡
+• 运动记录新增「运动地点」字段，支持导出和导入"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.2.4.5"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-14"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 刷牙记录支持点击编辑和删除\n• 运动记录支持点击编辑和删除\n• 猫咪如厕新增如厕意愿（如主动叫唤/被动抱走/甩屎）和如厕过程（进盆就拉/进进出出再拉/进盆再逃走）标签\n• 主界面一级菜单改名为「猫拉屎」和「猫刷牙」"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.2.4.4"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-13"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 猫咪如厕记录支持删除（编辑页带确认对话框）"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.2.4.3"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-13"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 猫咪如厕记录列表显示为所属成员（彩色标签）\n• 猫咪如厕记录支持点击编辑修改\n• 修复导入后数量/成员显示问题"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.2.4.2"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-13"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 修复导入数据后猫咪模块闪退（评分标签背景缺失导致空指针）\n• 修复猫咪名显示错误、导入粪便数量丢失"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.2.4.1"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-13"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 修复全新安装后猫咪/刷牙/运动模块闪退问题\n• （onCreate 遗漏建表导致查询失败）"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.2.4"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-13"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 修复数据库升级顺序导致的闪退问题\n• 数据导入/导出支持猫咪/刷牙/运动记录\n• 向前兼容旧版备份文件"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.2.3"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-13"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 猫咪如厕记录新增粪便数量指标\n• 主页右上角新增版本记录入口"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.2.2"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-13"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 猫咪记录改用成员选择\n• 新增如厕统计页面（距上次天数、间隔统计、评分分布）"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.2"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-08"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 新增猫咪如厕记录模块\n• 新增刷牙记录模块\n• 新增运动记录模块\n• 数据管理：导出/导入支持双段格式"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.1"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-08"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 多用户支持（成员管理、颜色标签）\n• 体重精度提升至小数点后两位\n• 数据导入/导出功能"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="V1.0"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-07-03"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 健康记录基础功能（体重、血压）\n• 图表统计\n• 数据导出"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

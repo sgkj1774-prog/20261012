@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 顶部按钮行 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="6dp"
+            android:background="#FFFFFF"
+            android:elevation="2dp"
+            android:gravity="center_vertical">
+
+            <Button android:id="@+id/btnCatMain"
+                android:layout_width="0dp" android:layout_height="46dp"
+                android:layout_weight="1" android:layout_marginHorizontal="3dp"
+                android:text="🐱 猫" android:textSize="15sp"
+                android:maxLines="1"
+                android:backgroundTint="#795548"/>
+
+            <Button android:id="@+id/btnExercise"
+                android:layout_width="0dp" android:layout_height="46dp"
+                android:layout_weight="1" android:layout_marginHorizontal="3dp"
+                android:text="🏃" android:textSize="18sp"
+                android:maxLines="1"
+                android:backgroundTint="#FF5722"/>
+
+            <Button android:id="@+id/btnBreathing"
+                android:layout_width="0dp" android:layout_height="46dp"
+                android:layout_weight="1" android:layout_marginHorizontal="3dp"
+                android:text="🌬" android:textSize="18sp"
+                android:maxLines="1"
+                android:backgroundTint="#E91E63"/>
+
+            <Button android:id="@+id/btnEvent"
+                android:layout_width="0dp" android:layout_height="46dp"
+                android:layout_weight="1" android:layout_marginHorizontal="3dp"
+                android:text="📌" android:textSize="18sp"
+                android:maxLines="1"
+                android:backgroundTint="#9C27B0"/>
+
+            <Button android:id="@+id/btnBook"
+                android:layout_width="0dp" android:layout_height="46dp"
+                android:layout_weight="1" android:layout_marginHorizontal="3dp"
+                android:text="📖" android:textSize="18sp"
+                android:maxLines="1"
+                android:backgroundTint="#795548"/>
+
+            <Button android:id="@+id/btnHealthRecords"
+                android:layout_width="0dp" android:layout_height="46dp"
+                android:layout_weight="1" android:layout_marginHorizontal="3dp"
+                android:text="💪" android:textSize="18sp"
+                android:maxLines="1"
+                android:backgroundTint="#4CAF50"/>
+        </LinearLayout>
+
+        <!-- 筛选行 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:background="#FFFFFF"
+            android:gravity="center_vertical">
+            <Spinner
+                android:id="@+id/spinnerUser"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:background="@drawable/spinner_bg"
+                android:layout_marginEnd="6dp"/>
+            <Button android:id="@+id/btnChart"
+                android:layout_width="wrap_content" android:layout_height="34dp"
+                android:text="趋势" android:textSize="12sp"
+                android:backgroundTint="#4CAF50"
+                android:paddingHorizontal="8dp"
+                android:layout_marginEnd="4dp"/>
+            <Button android:id="@+id/btnExport"
+                android:layout_width="wrap_content" android:layout_height="34dp"
+                android:text="数据" android:textSize="12sp"
+                android:backgroundTint="#2196F3"
+                android:paddingHorizontal="8dp"/>
+        </LinearLayout>
+
+        <!-- 主页内容区（可滚动） -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- 体重+运动趋势曲线图 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#FFFFFF"
+                    android:layout_marginBottom="6dp"
+                    android:paddingVertical="8dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="体重 · 运动趋势"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:paddingHorizontal="14dp"
+                        android:paddingBottom="4dp"/>
+                    <FrameLayout
+                        android:id="@+id/homeChartViewContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="200dp"/>
+                </LinearLayout>
+
+                <!-- 日历 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#FFFFFF"
+                    android:layout_marginBottom="6dp"
+                    android:paddingVertical="8dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="📅 日程"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:paddingHorizontal="14dp"
+                        android:paddingBottom="4dp"/>
+                    <FrameLayout
+                        android:id="@+id/homeCalendarViewContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <!-- 健康记录列表 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#FFFFFF"
+                    android:paddingVertical="8dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="💪 今日健康记录"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:paddingHorizontal="14dp"
+                        android:paddingBottom="6dp"/>
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="120dp">
+                        <ListView android:id="@+id/listViewRecords"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:dividerHeight="0dp"
+                            android:nestedScrollingEnabled="true"/>
+                        <TextView android:id="@+id/textViewEmpty"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="暂无记录\n点击右下角按钮添加"
+                            android:gravity="center"
+                            android:textSize="14sp"
+                            android:textColor="#BBBBBB"
+                            android:visibility="gone"/>
+                    </FrameLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+
+    <!-- FAB -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="#804CAF50"
+        app:tint="#FFFFFF"
+        app:fabSize="normal"
+        app:elevation="6dp"
+        app:pressedTranslationZ="12dp"
+        app:borderWidth="0dp"/>
+
+</FrameLayout>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="book_status_array">
+        <item>想读</item>
+        <item>在读</item>
+        <item>已读</item>
+    </string-array>
+    <string-array name="chart_range_array">
+        <item>全部</item>
+        <item>最近一周</item>
+        <item>最近一月</item>
+        <item>最近三月</item>
+    </string-array>
+</resources>
+

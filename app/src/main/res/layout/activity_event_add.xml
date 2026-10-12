@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- 顶部栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="14dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:text="←"
+            android:textSize="22sp"
+            android:background="@android:color/transparent"
+            android:textColor="#333333"/>
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📌 新增重要事项"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:gravity="center"/>
+
+        <View
+            android:layout_width="42dp"
+            android:layout_height="1dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 标题 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="标题 *"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editTitle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="请输入事项标题"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:textSize="15sp"
+                android:maxLines="1"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- 内容 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="内容（可选）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editContent"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:hint="输入详细说明..."
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:textSize="15sp"
+                android:gravity="top"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- 事件时间 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="事件时间"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                <Button
+                    android:id="@+id/btnEventDate"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="📅 日期"
+                    android:textSize="14sp"
+                    android:backgroundTint="#607D8B"
+                    android:layout_marginEnd="8dp"/>
+                <Button
+                    android:id="@+id/btnEventTime"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="🕐 时间"
+                    android:textSize="14sp"
+                    android:backgroundTint="#607D8B"/>
+            </LinearLayout>
+
+            <!-- 提醒开关 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="启用提醒"
+                    android:textSize="16sp"
+                    android:textColor="#333333"/>
+                <Switch
+                    android:id="@+id/switchRemind"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <!-- 提醒时间选择（条件显示） -->
+            <LinearLayout
+                android:id="@+id/layoutRemindTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="提醒时间"
+                    android:textSize="13sp"
+                    android:textColor="#999999"
+                    android:layout_marginBottom="4dp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <Button
+                        android:id="@+id/btnRemindDate"
+                        android:layout_width="0dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:text="📅 日期"
+                        android:textSize="14sp"
+                        android:backgroundTint="#FF9800"
+                        android:layout_marginEnd="8dp"/>
+                    <Button
+                        android:id="@+id/btnRemindTime"
+                        android:layout_width="0dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:text="🕐 时间"
+                        android:textSize="14sp"
+                        android:backgroundTint="#FF9800"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 优先级 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="优先级"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <RadioGroup
+                android:id="@+id/radioGroupPriority"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                <RadioButton
+                    android:id="@+id/radioHigh"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="🔴 高"
+                    android:textColor="#F44336"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:background="@drawable/spinner_bg"
+                    android:layout_marginEnd="4dp"/>
+                <RadioButton
+                    android:id="@+id/radioMid"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="🟠 中"
+                    android:textColor="#FF9800"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:background="@drawable/spinner_bg"
+                    android:layout_marginHorizontal="4dp"/>
+                <RadioButton
+                    android:id="@+id/radioLow"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="🟢 低"
+                    android:textColor="#4CAF50"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:button="@null"
+                    android:background="@drawable/spinner_bg"
+                    android:layout_marginStart="4dp"/>
+            </RadioGroup>
+
+            <!-- 重复类型 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="重复"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <Spinner
+                android:id="@+id/spinnerRepeat"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- 所属成员 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="所属成员"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <Spinner
+                android:id="@+id/spinnerUser"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- 保存按钮 -->
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="💾 保存"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:backgroundTint="#4CAF50"/>
+
+            <!-- 删除按钮（编辑时显示） -->
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="🗑 删除"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="#F44336"
+                android:textColor="#FFFFFF"
+                android:visibility="gone"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="20dp"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

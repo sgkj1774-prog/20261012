@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FAFAFA"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="数据备份导出"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="4dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="将记录导出备份到您指定的位置"
+        android:textSize="13sp"
+        android:textColor="#999999"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- 保存位置选择卡片 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"
+        android:elevation="1dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📂 保存位置"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/textViewFolderPath"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="未选择目录"
+            android:textSize="13sp"
+            android:textColor="#999999"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnSelectFolder"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="📁 选择保存位置"
+            android:backgroundTint="#757575"/>
+    </LinearLayout>
+
+    <!-- 导出按钮 -->
+    <Button android:id="@+id/btnExportCsv"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="📄 导出为 CSV"
+        android:backgroundTint="#4CAF50"
+        android:layout_marginBottom="12dp"/>
+
+    <Button android:id="@+id/btnExportExcel"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="📊 导出为 Excel (XLSX)"
+        android:backgroundTint="#2196F3"
+        android:layout_marginBottom="24dp"/>
+
+    <ProgressBar android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+    <TextView android:id="@+id/textStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="请先选择保存位置"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:layout_marginTop="16dp"/>
+
+    <!-- 分隔线 -->
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- 导入区域 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📥 数据导入"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="4dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="导入 CSV / Excel 备份文件（支持原版本导出的格式）"
+        android:textSize="13sp"
+        android:textColor="#999999"
+        android:layout_marginBottom="20dp"/>
+
+    <Button android:id="@+id/btnImportCsv"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="📄 导入 CSV 文件"
+        android:backgroundTint="#FF9800"
+        android:layout_marginBottom="12dp"/>
+
+    <Button android:id="@+id/btnImportExcel"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="📊 导入 Excel (XLSX) 文件"
+        android:backgroundTint="#9C27B0"
+        android:layout_marginBottom="24dp"/>
+
+    <ProgressBar android:id="@+id/progressBarImport"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+    <TextView android:id="@+id/textStatusImport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>

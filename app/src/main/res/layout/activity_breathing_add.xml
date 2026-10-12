@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- 顶部栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="14dp"
+        android:background="#4CAF50"
+        android:elevation="2dp"
+        android:gravity="center_vertical">
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:text="←"
+            android:textSize="22sp"
+            android:background="@android:color/transparent"
+            android:textColor="#FFFFFF"/>
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="呼吸打卡"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center"/>
+        <View
+            android:layout_width="42dp"
+            android:layout_height="42dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 日期时间 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="打卡时间"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                <Button
+                    android:id="@+id/btnDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:text="📅 日期"
+                    android:textColor="#333333"
+                    android:backgroundTint="#FFFFFF"/>
+                <Button
+                    android:id="@+id/btnTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:text="🕐 时间"
+                    android:textColor="#333333"
+                    android:backgroundTint="#FFFFFF"/>
+            </LinearLayout>
+
+            <!-- 时长 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="时长（分钟）"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
+            <NumberPicker
+                android:id="@+id/numberPickerDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- 模式 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="呼吸模式"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
+            <Spinner
+                android:id="@+id/spinnerMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:paddingVertical="8dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- 评分 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="评分（0-10）"
+                    android:textSize="14sp"
+                    android:textColor="#333333"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:id="@+id/textScoreValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5 分"
+                    android:textSize="14sp"
+                    android:textColor="#4CAF50"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+            <TextView
+                android:id="@+id/textScoreStars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="★★★★★☆☆☆☆☆"
+                android:textSize="16sp"
+                android:textColor="#FFC107"/>
+            <SeekBar
+                android:id="@+id/seekBarScore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="10"
+                android:progress="5"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- 自定义模式（默认隐藏） -->
+            <LinearLayout
+                android:id="@+id/customModeLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp"
+                android:background="#E8F5E9"
+                android:padding="12dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="请输入自定义呼吸模式（如：吸气4秒→屏气7秒→呼气8秒）"
+                    android:textSize="13sp"
+                    android:textColor="#2E7D32"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp"/>
+                <EditText
+                    android:id="@+id/editCustomContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="2"
+                    android:gravity="top|start"
+                    android:hint="例如：吸气4秒，屏气7秒，呼气8秒"
+                    android:background="#FFFFFF"
+                    android:padding="10dp"
+                    android:textColor="#333333"
+                    android:textColorHint="#BBBBBB"
+                    android:inputType="textMultiLine"
+                    android:layout_marginBottom="8dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="自定义时长（分钟）"
+                    android:textSize="13sp"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="4dp"/>
+                <EditText
+                    android:id="@+id/editCustomMinutes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="5"
+                    android:background="#FFFFFF"
+                    android:padding="10dp"
+                    android:textColor="#333333"
+                    android:textColorHint="#BBBBBB"
+                    android:inputType="number"/>
+            </LinearLayout>
+
+            <!-- 备注 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="备注"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
+            <EditText
+                android:id="@+id/editNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minLines="3"
+                android:gravity="top|start"
+                android:hint="记录一下此刻的感受…"
+                android:background="#FFFFFF"
+                android:padding="12dp"
+                android:textColor="#333333"
+                android:textColorHint="#BBBBBB"
+                android:inputType="textMultiLine"
+                android:layout_marginBottom="20dp"/>
+
+            <!-- 保存 -->
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="💾 保存"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:backgroundTint="#4CAF50"/>
+
+            <!-- 删除（编辑模式显示） -->
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:text="🗑 删除"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:backgroundTint="#E53935"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

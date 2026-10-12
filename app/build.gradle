@@ -1,0 +1,51 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.healthrecorder'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.healthassistant"
+        minSdk 26
+        targetSdk 34
+        versionCode 29
+        versionName "1.4.8"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // 安装包命名规范：健康小助手_V版本号_build构建号_类型.apk
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def type = variant.buildType.name
+            outputFileName = "健康小助手_V${variant.versionName}_build${variant.versionCode}_${type}.apk"
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.documentfile:documentfile:1.0.1'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    implementation 'androidx.work:work-runtime:2.9.0'
+    implementation 'androidx.preference:preference:1.2.1'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}

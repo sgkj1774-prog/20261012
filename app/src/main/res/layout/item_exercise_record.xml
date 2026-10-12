@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="8dp"
+    android:background="@android:color/white"
+    android:padding="14dp"
+    android:elevation="1dp">
+    <!-- 顶栏：类型+日期+地点 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+        <TextView
+            android:id="@+id/textType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/textDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="13sp"
+            android:textColor="#999999"
+            android:gravity="end"/>
+    </LinearLayout>
+    <!-- 地点行 -->
+    <TextView
+        android:id="@+id/textLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:textColor="#00BCD4"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone"/>
+    <!-- 三个指标卡 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="6dp">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+            android:background="#FFF3E0" android:padding="8dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="距离" android:textSize="11sp" android:textColor="#999999"/>
+            <TextView android:id="@+id/textDistance" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textSize="15sp"
+                android:textColor="#FF5722" android:textStyle="bold"/>
+        </LinearLayout>
+        <View android:layout_width="6dp" android:layout_height="1dp"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+            android:background="#E3F2FD" android:padding="8dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="时长" android:textSize="11sp" android:textColor="#999999"/>
+            <TextView android:id="@+id/textDuration" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textSize="15sp"
+                android:textColor="#2196F3" android:textStyle="bold"/>
+        </LinearLayout>
+        <View android:layout_width="6dp" android:layout_height="1dp"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+            android:background="#F3E5F5" android:padding="8dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="配速/爬升" android:textSize="11sp" android:textColor="#999999"/>
+            <TextView android:id="@+id/textPace" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:textSize="15sp"
+                android:textColor="#9C27B0" android:textStyle="bold"/>
+        </LinearLayout>
+    </LinearLayout>
+    <!-- 备注 -->
+    <TextView
+        android:id="@+id/textNotes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:textColor="#999999"
+        android:visibility="gone"/>
+</LinearLayout>
