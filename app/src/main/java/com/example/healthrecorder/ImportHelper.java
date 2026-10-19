@@ -100,19 +100,35 @@ public class ImportHelper {
         List<Event> events = new ArrayList<>();
         List<BookRecord> bookRecords = new ArrayList<>();
         List<CatFoodRecord> catFoodRecords = new ArrayList<>();
+        List<NoteRow> noteRows = new ArrayList<>();
         int totalLines = 0;
         int skippedLines = 0;
-
-        // 分段状态
         String currentSection = "records"; // 默认兼容旧格式
         boolean headerSeen = false;
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String line;
+        String rawLine;
         boolean first = true;
-        while ((line = reader.readLine()) != null) {
+        // 某些字段（如重要事项内容）本身含换行，CSV 里会被引号包裹跨多行。
+        // 这里按引号奇偶判断是否仍在同一条记录内，保证整条记录被完整读入。
+        StringBuilder multi = null;
+        while ((rawLine = reader.readLine()) != null) {
             totalLines++;
-            if (first) { first = false; line = stripBom(line); }
+            if (first) { first = false; rawLine = stripBom(rawLine); }
+
+            String line;
+            if (multi != null) {
+                multi.append('\n').append(rawLine);
+                if (countQuotes(multi) % 2 != 0) continue;   // 引号未闭合，继续拼接
+                line = multi.toString();
+                multi = null;
+            } else if (countQuotes(rawLine) % 2 != 0) {
+                multi = new StringBuilder(rawLine);
+                continue;
+            } else {
+                line = rawLine;
+            }
+
             String trimmed = line.trim();
             if (trimmed.isEmpty()) { continue; }
 
@@ -126,6 +142,7 @@ public class ImportHelper {
                 else if (trimmed.contains("呼吸打卡记录")) { currentSection = "breathing"; headerSeen = false; }
                 else if (trimmed.contains("重要事项记录")) { currentSection = "event"; headerSeen = false; }
                 else if (trimmed.contains("读书笔记记录")) { currentSection = "book"; headerSeen = false; }
+                else if (trimmed.contains("读后感明细")) { currentSection = "bookNote"; headerSeen = false; }
                 else if (trimmed.contains("猫粮记录")) { currentSection = "catFood"; headerSeen = false; }
                 continue;
             }
@@ -133,7 +150,7 @@ public class ImportHelper {
             // 跳过表头
             if (!headerSeen) {
                 headerSeen = true;
-                if (trimmed.startsWith("ID") || trimmed.startsWith("日期")) { continue; }
+                if (trimmed.startsWith("ID") || trimmed.startsWith("日期") || trimmed.startsWith("书名")) { continue; }
             }
 
             // 解析行
@@ -175,12 +192,17 @@ public class ImportHelper {
                         CatFoodRecord cf = parseCatFoodLine(line);
                         if (cf != null) catFoodRecords.add(cf); else skippedLines++;
                         break;
+                    case "bookNote":
+                        NoteRow nr = parseNoteLine(line);
+                        if (nr != null) noteRows.add(nr); else skippedLines++;
+                        break;
                 }
             } catch (Exception e) {
                 skippedLines++;
             }
         }
         reader.close();
+        attachNoteRows(bookRecords, noteRows);
         return new ImportResult(records, users, catRecords, teethRecords, exerciseRecords,
                 breathingRecords, events, bookRecords, catFoodRecords,
                 totalLines, skippedLines, null);
@@ -389,6 +411,17 @@ public class ImportHelper {
                     }
                 }
             }
+            // 第 8 列（可选）：提醒时间。旧备份无此列时不开启提醒
+            if (f.size() > 7) {
+                String remindStr = f.get(7).trim();
+                if (!remindStr.isEmpty()) {
+                    Date remindTime = parseDate(remindStr);
+                    if (remindTime != null) {
+                        ev.setRemindTime(remindTime);
+                        ev.setRemindEnabled(true);
+                    }
+                }
+            }
             return ev;
         } catch (Exception e) {
             return null;
@@ -436,6 +469,11 @@ public class ImportHelper {
                 }
             }
             if (f.size() > 8) b.setNotes(f.get(8).trim().isEmpty() ? null : f.get(8).trim());
+            // 第 10 列（可选）：开始阅读时间。旧备份无此列则保持空
+            if (f.size() > 9) {
+                Date st = parseDate(f.get(9).trim());
+                if (st != null) b.setStartAt(st);
+            }
             return b;
         } catch (Exception e) {
             return null;
@@ -469,6 +507,66 @@ public class ImportHelper {
             return cf;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    // ============================================================
+    // 读后感明细（页面区间）解析与挂载 — v12 新增
+    // ============================================================
+
+    /** 导入中间态：一条读后感明细，尚未绑定数据库 id */
+    private static class NoteRow {
+        String bookTitle;
+        String userName;
+        int startPage;
+        int endPage;
+        String content;
+        Date createdAt;
+    }
+
+    // CSV 列：书名,成员,起始页,结束页,内容,创建时间
+    private static NoteRow parseNoteLine(String rawLine) {
+        List<String> f = splitCsvLine(rawLine);
+        if (f.size() < 5) return null;
+        try {
+            NoteRow n = new NoteRow();
+            n.bookTitle = f.get(0).trim();
+            if (n.bookTitle.isEmpty()) return null;
+            n.userName = f.get(1).trim();
+            String s = f.get(2).trim();
+            String e = f.get(3).trim();
+            if (!s.isEmpty()) n.startPage = (int) Double.parseDouble(s);
+            if (!e.isEmpty()) n.endPage = (int) Double.parseDouble(e);
+            n.content = f.get(4).trim().isEmpty() ? null : f.get(4).trim();
+            if (f.size() > 5) n.createdAt = parseDate(f.get(5).trim());
+            return n;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** 按「书名 + 成员」把明细挂到对应 BookRecord，等插入拿到真实 id 后再落库 */
+    private static void attachNoteRows(List<BookRecord> books, List<NoteRow> rows) {
+        if (books == null || rows == null || rows.isEmpty()) return;
+        for (NoteRow nr : rows) {
+            BookRecord target = null;
+            for (BookRecord b : books) {
+                if (b.getTitle() == null) continue;
+                if (!b.getTitle().trim().equals(nr.bookTitle)) continue;
+                String bu = b.getUserName() != null ? b.getUserName().trim() : "";
+                if (nr.userName != null && !nr.userName.isEmpty()
+                        && !bu.isEmpty() && !bu.equals(nr.userName)) continue;
+                target = b;
+                break;
+            }
+            if (target != null) {
+                com.example.healthrecorder.book.BookNote note = new com.example.healthrecorder.book.BookNote();
+                note.setStartPage(nr.startPage);
+                note.setEndPage(nr.endPage);
+                note.setContent(nr.content);
+                note.setCreatedAt(nr.createdAt);
+                target.addPendingNote(note);
+            }
         }
     }
 
@@ -638,6 +736,24 @@ public class ImportHelper {
                 break;
             }
         }
+
+        // 读后感明细（v12）：按「书名 + 成员」挂到对应书籍上
+        List<NoteRow> noteRows = new ArrayList<>();
+        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            if (sheet != null && sheet.getSheetName() != null && sheet.getSheetName().contains("读后感")) {
+                boolean first = true;
+                for (Row row : sheet) {
+                    if (row == null) continue;
+                    totalRows++;
+                    if (first) { first = false; continue; }
+                    NoteRow nr = parseNoteRow(row);
+                    if (nr != null) noteRows.add(nr); else skippedRows++;
+                }
+                break;
+            }
+        }
+        attachNoteRows(bookRecords, noteRows);
 
         workbook.close();
         return new ImportResult(records, users, catRecords, teethRecords, exerciseRecords,
@@ -841,6 +957,15 @@ public class ImportHelper {
                     else ev.setRepeatType(0);
                 }
             }
+            // 第 8 列（可选）：提醒时间。旧备份没有这一列，读不到就保持未开启提醒
+            String remindStr = cellToString(row.getCell(7)).trim();
+            if (!remindStr.isEmpty()) {
+                Date remindTime = parseDate(remindStr);
+                if (remindTime != null) {
+                    ev.setRemindTime(remindTime);
+                    ev.setRemindEnabled(true);
+                }
+            }
             return ev;
         } catch (Exception e) {
             return null;
@@ -879,7 +1004,35 @@ public class ImportHelper {
             }
             String notes = cellToString(row.getCell(8)).trim();
             b.setNotes(notes.isEmpty() ? null : notes);
+            // 第 10 列（可选）：开始阅读时间
+            String startStr = cellToString(row.getCell(9)).trim();
+            if (!startStr.isEmpty()) {
+                Date st = parseDate(startStr);
+                if (st != null) b.setStartAt(st);
+            }
             return b;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 读后感明细 Sheet 列：0=书名,1=成员,2=起始页,3=结束页,4=内容,5=创建时间
+    private static NoteRow parseNoteRow(Row row) {
+        try {
+            String title = cellToString(row.getCell(0)).trim();
+            if (title.isEmpty()) return null;
+            NoteRow n = new NoteRow();
+            n.bookTitle = title;
+            n.userName = cellToString(row.getCell(1)).trim();
+            String s = cellToString(row.getCell(2)).trim();
+            String e = cellToString(row.getCell(3)).trim();
+            if (!s.isEmpty()) n.startPage = (int) Double.parseDouble(s);
+            if (!e.isEmpty()) n.endPage = (int) Double.parseDouble(e);
+            String c = cellToString(row.getCell(4)).trim();
+            n.content = c.isEmpty() ? null : c;
+            String d = cellToString(row.getCell(5)).trim();
+            if (!d.isEmpty()) n.createdAt = parseDate(d);
+            return n;
         } catch (Exception e) {
             return null;
         }
@@ -943,6 +1096,15 @@ public class ImportHelper {
             default:
                 return "";
         }
+    }
+
+    /** 统计引号数量，用于判断 CSV 记录是否跨行（未闭合） */
+    private static int countQuotes(CharSequence s) {
+        int n = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == '"') n++;
+        }
+        return n;
     }
 
     private static String stripBom(String line) {

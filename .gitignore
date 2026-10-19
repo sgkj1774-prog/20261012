@@ -2,8 +2,7 @@
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
-gradlew
-gradlew.bat
+# gradlew / gradlew.bat 必须入库，否则新克隆无法执行 ./gradlew 构建
 
 # ===== Android Studio / IDE =====
 .idea/

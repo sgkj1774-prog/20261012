@@ -181,14 +181,30 @@
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="地点（可选）" android:textSize="13sp" android:textColor="#999999"
                 android:layout_marginBottom="4dp"/>
-            <EditText android:id="@+id/editLocation"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:hint="如：滨江公园、跑步机"
-                android:background="@android:color/white"
-                android:paddingHorizontal="12dp"
-                android:textSize="15sp"
-                android:layout_marginBottom="12dp"/>
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <EditText android:id="@+id/editLocation"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="50dp"
+                    android:hint="如：滨江公园、跑步机"
+                    android:background="@android:color/white"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:layout_marginEnd="8dp"/>
+                <Button
+                    android:id="@+id/btnLocationHistory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:text="📍 历史"
+                    android:textSize="14sp"
+                    android:backgroundTint="#78909C"
+                    android:textColor="#FFFFFF"/>
+            </LinearLayout>
 
             <!-- 备注 -->
             <TextView

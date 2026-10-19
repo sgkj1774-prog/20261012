@@ -11,11 +11,12 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "health_recorder.db";
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 12;
 
     static final String TABLE_RECORDS = "records";
     static final String TABLE_USERS = "users";
     static final String TABLE_CAT_FOOD = "cat_food_records";
+    static final String TABLE_BOOK_NOTES = "book_notes";
 
     public static final String COLUMN_ID = "id";
     static final String COLUMN_WEIGHT = "weight";
@@ -139,8 +140,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + "finished_at INTEGER,"
                 + "user_id INTEGER DEFAULT 1,"
                 + "finished_page INTEGER,"
-                + "finished_notes TEXT"
+                + "finished_notes TEXT,"
+                + "start_at INTEGER"
                 + ")");
+
+        // 读后感明细表（v12）：一本书可有多条，每条对应一个页面区间
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_BOOK_NOTES + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "book_id INTEGER NOT NULL,"
+                + "start_page INTEGER,"
+                + "end_page INTEGER,"
+                + "content TEXT,"
+                + "created_at INTEGER,"
+                + "user_id INTEGER DEFAULT 1"
+                + ")");
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_book_notes_book ON " + TABLE_BOOK_NOTES + "(book_id)");
 
         // 猫粮记录表（end_date 为 NULL 表示当前在吃）
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_CAT_FOOD + " ("
@@ -202,15 +216,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + ")");
         }
         if (oldVersion < 5) {
-            db.execSQL("ALTER TABLE cat_records ADD COLUMN willingness INTEGER DEFAULT 0");
-            db.execSQL("ALTER TABLE cat_records ADD COLUMN process_type INTEGER DEFAULT 0");
-            db.execSQL("ALTER TABLE cat_records ADD COLUMN stool_count INTEGER DEFAULT 8");
+            // 注意：v4 建表时已包含 stool_count，这里必须容错，否则从 v4 升级会抛 duplicate column
+            try { db.execSQL("ALTER TABLE cat_records ADD COLUMN willingness INTEGER DEFAULT 0"); } catch (Exception ignored) {}
+            try { db.execSQL("ALTER TABLE cat_records ADD COLUMN process_type INTEGER DEFAULT 0"); } catch (Exception ignored) {}
+            try { db.execSQL("ALTER TABLE cat_records ADD COLUMN stool_count INTEGER DEFAULT 8"); } catch (Exception ignored) {}
         }
         if (oldVersion < 6) {
-            db.execSQL("ALTER TABLE exercise_records ADD COLUMN location TEXT");
+            try { db.execSQL("ALTER TABLE exercise_records ADD COLUMN location TEXT"); } catch (Exception ignored) {}
         }
         if (oldVersion < 7) {
-            db.execSQL("ALTER TABLE cat_records ADD COLUMN stool_count INTEGER DEFAULT 8");
+            // v5 已添加过该列，此处幂等执行，重复时静默跳过
+            try { db.execSQL("ALTER TABLE cat_records ADD COLUMN stool_count INTEGER DEFAULT 8"); } catch (Exception ignored) {}
         }
         if (oldVersion < 8) {
             // 呼吸打卡记录表
@@ -281,6 +297,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < 11) {
             try { db.execSQL("ALTER TABLE book_reading_records ADD COLUMN finished_page INTEGER"); } catch (Exception ignored) {}
             try { db.execSQL("ALTER TABLE book_reading_records ADD COLUMN finished_notes TEXT"); } catch (Exception ignored) {}
+        }
+        if (oldVersion < 12) {
+            // 读书记录增加「开始阅读时间」（精确到时分）
+            try { db.execSQL("ALTER TABLE book_reading_records ADD COLUMN start_at INTEGER"); } catch (Exception ignored) {}
+            // 读后感明细表：一本书可有多条，每条绑定一个页面区间
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_BOOK_NOTES + " ("
+                    + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + "book_id INTEGER NOT NULL,"
+                    + "start_page INTEGER,"
+                    + "end_page INTEGER,"
+                    + "content TEXT,"
+                    + "created_at INTEGER,"
+                    + "user_id INTEGER DEFAULT 1"
+                    + ")");
+            db.execSQL("CREATE INDEX IF NOT EXISTS idx_book_notes_book ON " + TABLE_BOOK_NOTES + "(book_id)");
         }
     }
 
@@ -1078,6 +1109,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (fpIdx >= 0 && !c.isNull(fpIdx)) r.setFinishedPage(c.getInt(fpIdx));
                 int fnIdx = c.getColumnIndex("finished_notes");
                 if (fnIdx >= 0 && !c.isNull(fnIdx)) r.setFinishedNotes(c.getString(fnIdx));
+                int saIdx = c.getColumnIndex("start_at");
+                if (saIdx >= 0 && !c.isNull(saIdx)) r.setStartAt(new Date(c.getLong(saIdx)));
                 list.add(r);
             } while (c.moveToNext());
         }
@@ -1101,6 +1134,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         v.put("user_id", r.getUserId());
         v.put("finished_page", r.getFinishedPage());
         v.put("finished_notes", r.getFinishedNotes());
+        v.put("start_at", r.getStartAt() != null ? r.getStartAt().getTime() : null);
         long id = db.insert("book_reading_records", null, v);
         db.close();
         return id;
@@ -1119,12 +1153,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         v.put("finished_at", r.getFinishedAt() != null ? r.getFinishedAt().getTime() : null);
         v.put("finished_page", r.getFinishedPage());
         v.put("finished_notes", r.getFinishedNotes());
+        v.put("start_at", r.getStartAt() != null ? r.getStartAt().getTime() : null);
         db.update("book_reading_records", v, "id=?", new String[]{String.valueOf(r.getId())});
         db.close();
     }
 
     public void deleteBookRecord(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
+        // 连带删除该书的读后感明细，避免孤儿数据
+        db.delete(TABLE_BOOK_NOTES, "book_id=?", new String[]{String.valueOf(id)});
         db.delete("book_reading_records", "id=?", new String[]{String.valueOf(id)});
         db.close();
     }
@@ -1136,6 +1173,84 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return count;
+    }
+
+    // ============================================================
+    // 读后感明细（页面区间）CRUD — v12 新增
+    // ============================================================
+
+    public List<com.example.healthrecorder.book.BookNote> getBookNotes(int bookId) {
+        List<com.example.healthrecorder.book.BookNote> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT * FROM " + TABLE_BOOK_NOTES + " WHERE book_id=? ORDER BY start_page ASC, id ASC",
+                new String[]{String.valueOf(bookId)});
+        if (c.moveToFirst()) {
+            do {
+                list.add(readBookNote(c));
+            } while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return list;
+    }
+
+    public List<com.example.healthrecorder.book.BookNote> getAllBookNotes() {
+        List<com.example.healthrecorder.book.BookNote> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_BOOK_NOTES + " ORDER BY book_id ASC, start_page ASC", null);
+        if (c.moveToFirst()) {
+            do {
+                list.add(readBookNote(c));
+            } while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return list;
+    }
+
+    private com.example.healthrecorder.book.BookNote readBookNote(Cursor c) {
+        com.example.healthrecorder.book.BookNote n = new com.example.healthrecorder.book.BookNote();
+        n.setId(c.getInt(c.getColumnIndexOrThrow("id")));
+        n.setBookId(c.getInt(c.getColumnIndexOrThrow("book_id")));
+        n.setStartPage(c.getInt(c.getColumnIndexOrThrow("start_page")));
+        n.setEndPage(c.getInt(c.getColumnIndexOrThrow("end_page")));
+        n.setContent(c.getString(c.getColumnIndexOrThrow("content")));
+        int caIdx = c.getColumnIndex("created_at");
+        if (caIdx >= 0 && !c.isNull(caIdx)) n.setCreatedAt(new Date(c.getLong(caIdx)));
+        int uidIdx = c.getColumnIndex("user_id");
+        if (uidIdx >= 0) n.setUserId(c.getInt(uidIdx));
+        return n;
+    }
+
+    public long addBookNote(com.example.healthrecorder.book.BookNote n) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put("book_id", n.getBookId());
+        v.put("start_page", n.getStartPage());
+        v.put("end_page", n.getEndPage());
+        v.put("content", n.getContent());
+        v.put("created_at", n.getCreatedAt() != null ? n.getCreatedAt().getTime() : System.currentTimeMillis());
+        v.put("user_id", n.getUserId());
+        long id = db.insert(TABLE_BOOK_NOTES, null, v);
+        db.close();
+        return id;
+    }
+
+    public void updateBookNote(com.example.healthrecorder.book.BookNote n) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put("start_page", n.getStartPage());
+        v.put("end_page", n.getEndPage());
+        v.put("content", n.getContent());
+        db.update(TABLE_BOOK_NOTES, v, "id=?", new String[]{String.valueOf(n.getId())});
+        db.close();
+    }
+
+    public void deleteBookNote(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_BOOK_NOTES, "id=?", new String[]{String.valueOf(id)});
+        db.close();
     }
 
     // ============================================================
@@ -1290,6 +1405,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return count;
     }
 
+    /**
+     * 取历史地点（按使用次数倒序，最近使用优先），用于添加记录时的地点联想。
+     * 只返回非空地点，最多 limit 条。
+     */
+    public List<String> getDistinctExerciseLocations(int limit) {
+        List<String> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT location, COUNT(*) AS cnt, MAX(date) AS last_used "
+                        + "FROM exercise_records "
+                        + "WHERE location IS NOT NULL AND TRIM(location) <> '' "
+                        + "GROUP BY TRIM(location) "
+                        + "ORDER BY cnt DESC, last_used DESC "
+                        + "LIMIT " + Math.max(1, limit),
+                null);
+        if (c.moveToFirst()) {
+            do {
+                list.add(c.getString(0));
+            } while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return list;
+    }
+
     // ============================================================
     // Data Reset
     // ============================================================
@@ -1303,6 +1443,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete("breathing_records", null, null);
         db.delete("events", null, null);
         db.delete("book_reading_records", null, null);
+        db.delete(TABLE_BOOK_NOTES, null, null);
         db.delete("cat_food_records", null, null);
         db.execSQL("INSERT INTO " + TABLE_USERS + "(" + COLUMN_USER_NAME + "," + COLUMN_USER_COLOR + ") VALUES ('本人', 0)");
         db.close();

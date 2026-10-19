@@ -362,6 +362,11 @@ public class HealthRepository {
     public int getExerciseRecordCount() {
         return mDbHelper.getExerciseRecordCount();
     }
+
+    /** 历史运动地点（按使用频次倒序），用于添加记录时快速选择 */
+    public List<String> getExerciseLocations(int limit) {
+        return mDbHelper.getDistinctExerciseLocations(limit);
+    }
     
     // ============================================================
     // Breathing Record CRUD 操作（呼吸打卡记录）
@@ -482,6 +487,32 @@ public class HealthRepository {
      */
     public int getBookRecordCount() {
         return mDbHelper.getBookRecordCount();
+    }
+
+    // ============================================================
+    // 读后感明细（页面区间）— v12 新增
+    // ============================================================
+
+    /** 取某本书的全部读后感明细，按起始页升序 */
+    public List<com.example.healthrecorder.book.BookNote> getBookNotes(int bookId) {
+        return mDbHelper.getBookNotes(bookId);
+    }
+
+    /** 取全部读后感明细（导出用） */
+    public List<com.example.healthrecorder.book.BookNote> getAllBookNotes() {
+        return mDbHelper.getAllBookNotes();
+    }
+
+    public long addBookNote(com.example.healthrecorder.book.BookNote n) {
+        return mDbHelper.addBookNote(n);
+    }
+
+    public void updateBookNote(com.example.healthrecorder.book.BookNote n) {
+        mDbHelper.updateBookNote(n);
+    }
+
+    public void deleteBookNote(int id) {
+        mDbHelper.deleteBookNote(id);
     }
     
     // ============================================================

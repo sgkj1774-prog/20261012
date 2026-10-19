@@ -1,5 +1,6 @@
 package com.example.healthrecorder.event;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -9,13 +10,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.healthrecorder.HealthRepository;
 import com.example.healthrecorder.R;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class EventStatsActivity extends AppCompatActivity {
 
     private HealthRepository repository;
+    private final SimpleDateFormat DAY_FMT = new SimpleDateFormat("yyyy年M月d日 EEEE", Locale.getDefault());
+    private final SimpleDateFormat TIME_FMT = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +65,13 @@ public class EventStatsActivity extends AppCompatActivity {
                 }
             }
 
+            // 日历：橙点=记录时间，蓝环=提醒时间
+            EventCalendarView calendar = findViewById(R.id.eventCalendar);
+            if (calendar != null) {
+                calendar.setEvents(events);
+                calendar.setOnDayClickListener(this::showDayDetail);
+            }
+
             tvTotal.setText("总事项数：" + total);
             tvPending.setText("待办：" + pending);
             tvDone.setText("已完成：" + done);
@@ -71,6 +84,42 @@ public class EventStatsActivity extends AppCompatActivity {
         } catch (Throwable t) {
             tvTotal.setText("统计失败：" + t.getClass().getSimpleName());
         }
+    }
+
+    /** 点击日历某天：列出当天事项，并分别标注记录时间与提醒时间 */
+    private void showDayDetail(Calendar day, List<Event> dayEvents) {
+        StringBuilder sb = new StringBuilder();
+        if (dayEvents == null || dayEvents.isEmpty()) {
+            sb.append("这一天没有安排事项");
+        } else {
+            for (Event e : dayEvents) {
+                boolean onEventDay = isSameDay(e.getEventTime(), day);
+                boolean onRemindDay = e.isRemindEnabled() && isSameDay(e.getRemindTime(), day);
+                sb.append("【").append(e.getPriorityText()).append("】")
+                        .append(e.getTitle() == null || e.getTitle().isEmpty() ? "(无标题)" : e.getTitle())
+                        .append("  · ").append(e.getStatusText()).append("\n");
+                if (onEventDay) {
+                    sb.append("🟠 记录时间 ").append(TIME_FMT.format(e.getEventTime())).append("\n");
+                }
+                if (onRemindDay) {
+                    sb.append("🔵 提醒时间 ").append(TIME_FMT.format(e.getRemindTime())).append("\n");
+                }
+                sb.append("\n");
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(DAY_FMT.format(day.getTime()))
+                .setMessage(sb.toString().trim())
+                .setPositiveButton("关闭", null)
+                .show();
+    }
+
+    private boolean isSameDay(java.util.Date date, Calendar day) {
+        if (date == null) return false;
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        return c.get(Calendar.YEAR) == day.get(Calendar.YEAR)
+                && c.get(Calendar.DAY_OF_YEAR) == day.get(Calendar.DAY_OF_YEAR);
     }
 
     private String mapToText(Map<String, Integer> map) {

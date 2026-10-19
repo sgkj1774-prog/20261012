@@ -49,6 +49,35 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="V1.4.9"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-10-19"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 运动统计：新增上月、本年的跑步距离与时长汇总\n• 添加运动记录：地点支持从历史地点中直接选择\n• 重要事项统计：新增事项日历，记录时间与提醒时间用不同标记区分\n• 读书笔记：支持记录开始阅读时间（精确到时分）\n• 读书笔记：读后感支持按页面区间记录多条\n• 导出导入：新增上述字段与读后感明细，修复 CSV 中多行内容丢失的问题\n• 数据库升级到 v12，修复旧版本升级可能闪退的问题"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="V1.4.8"
                 android:textSize="16sp"
                 android:textColor="#212121"

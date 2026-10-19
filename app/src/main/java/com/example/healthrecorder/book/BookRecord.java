@@ -1,6 +1,8 @@
 package com.example.healthrecorder.book;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class BookRecord {
     private int id;
@@ -17,6 +19,12 @@ public class BookRecord {
     private String userName;
     private int finishedPage;      // 归档时的页数（读完时固化）
     private String finishedNotes;   // 归档时的读后感（读完时固化）
+    private Date startAt;           // 开始阅读时间（v12 新增，精确到时分）
+    /**
+     * 仅用于导入过程的暂存：解析阶段把读后感明细挂在这里，
+     * 等书籍插入拿到真实 id 后再落库。不参与持久化。
+     */
+    private List<BookNote> pendingNotes = new ArrayList<>();
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -46,6 +54,10 @@ public class BookRecord {
     public void setFinishedPage(int finishedPage) { this.finishedPage = finishedPage; }
     public String getFinishedNotes() { return finishedNotes; }
     public void setFinishedNotes(String finishedNotes) { this.finishedNotes = finishedNotes; }
+    public Date getStartAt() { return startAt; }
+    public void setStartAt(Date startAt) { this.startAt = startAt; }
+    public List<BookNote> getPendingNotes() { return pendingNotes; }
+    public void addPendingNote(BookNote note) { if (note != null) pendingNotes.add(note); }
 
     public String getStatusText() {
         if (status == 1) return "在读";

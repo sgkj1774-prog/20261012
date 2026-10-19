@@ -167,6 +167,7 @@ public class DataManagementActivity extends AppCompatActivity {
                 List<com.example.healthrecorder.event.Event> events = repository.getAllEvents();
                 List<com.example.healthrecorder.book.BookRecord> bookRecords = repository.getAllBookRecords();
                 List<com.example.healthrecorder.cat.CatFoodRecord> catFoodRecords = repository.getAllCatFoodRecords();
+                List<com.example.healthrecorder.book.BookNote> bookNotes = repository.getAllBookNotes();
 
                 if (records.isEmpty() && users.isEmpty() && catRecords.isEmpty() && teethRecords.isEmpty() && exerciseRecords.isEmpty() && breathingRecords.isEmpty() && events.isEmpty() && bookRecords.isEmpty() && catFoodRecords.isEmpty()) {
                     postOnUi(() -> {
@@ -185,8 +186,8 @@ public class DataManagementActivity extends AppCompatActivity {
                 if (targetFile == null) throw new Exception("创建文件失败");
 
                 byte[] data = format.equals("csv")
-                        ? ExportHelper.buildCsvBytes(records, users, catRecords, teethRecords, exerciseRecords, breathingRecords, events, bookRecords, catFoodRecords)
-                        : ExportHelper.buildExcelBytes(records, users, catRecords, teethRecords, exerciseRecords, breathingRecords, events, bookRecords, catFoodRecords);
+                        ? ExportHelper.buildCsvBytes(records, users, catRecords, teethRecords, exerciseRecords, breathingRecords, events, bookRecords, catFoodRecords, bookNotes)
+                        : ExportHelper.buildExcelBytes(records, users, catRecords, teethRecords, exerciseRecords, breathingRecords, events, bookRecords, catFoodRecords, bookNotes);
                 if (data == null || data.length == 0) throw new Exception("内容生成失败（空数据）");
 
                 Uri fileUri = targetFile.getUri();
@@ -375,11 +376,21 @@ public class DataManagementActivity extends AppCompatActivity {
 
                 // 8) 还原读书笔记记录
                 int bookInserted = 0;
+                int bookNotesInserted = 0;
                 for (com.example.healthrecorder.book.BookRecord bk : result.bookRecords) {
                     Integer uid = nameToId.get(bk.getUserName());
                     bk.setUserId(uid != null ? uid : 1);
-                    repository.addBookRecord(bk);
+                    long newBookId = repository.addBookRecord(bk);
                     bookInserted++;
+                    // 该书的分段读后感需要真实 id，落库时一并写入
+                    if (newBookId > 0 && bk.getPendingNotes() != null) {
+                        for (com.example.healthrecorder.book.BookNote n : bk.getPendingNotes()) {
+                            n.setBookId((int) newBookId);
+                            n.setUserId(bk.getUserId());
+                            repository.addBookNote(n);
+                            bookNotesInserted++;
+                        }
+                    }
                 }
 
                 // 9) 还原猫粮记录
@@ -394,12 +405,13 @@ public class DataManagementActivity extends AppCompatActivity {
                 final int fInserted = inserted, fSkipped = skipped, fDup = dup, fUsers = usersAdded;
                 final int fCat = catInserted, fTeeth = teethInserted, fEx = exerciseInserted;
                 final int fBreath = breathingInserted, fEvent = eventInserted, fBook = bookInserted, fCatFood = catFoodInserted;
+                final int fBookNotes = bookNotesInserted;
                 postOnUi(() -> {
                     progressBarImport.setVisibility(View.GONE);
                     setImportButtonsEnabled(true);
                     textStatusImport.setText(String.format(Locale.getDefault(),
-                            "✓ 导入完成！\n新增成员 %d 个\n健康 %d | 猫咪 %d | 刷牙 %d | 运动 %d\n呼吸 %d | 事项 %d | 读书 %d | 猫粮 %d\n跳过空记录：%d 条 | 重复跳过 %d 条",
-                            fUsers, fInserted, fCat, fTeeth, fEx, fBreath, fEvent, fBook, fCatFood, fSkipped, fDup));
+                            "✓ 导入完成！\n新增成员 %d 个\n健康 %d | 猫咪 %d | 刷牙 %d | 运动 %d\n呼吸 %d | 事项 %d | 读书 %d（段落读后感 %d） | 猫粮 %d\n跳过空记录：%d 条 | 重复跳过 %d 条",
+                            fUsers, fInserted, fCat, fTeeth, fEx, fBreath, fEvent, fBook, fBookNotes, fCatFood, fSkipped, fDup));
                     Toast.makeText(this, "已导入 " + fInserted + " 条记录", Toast.LENGTH_SHORT).show();
                 });
             } catch (Exception e) {

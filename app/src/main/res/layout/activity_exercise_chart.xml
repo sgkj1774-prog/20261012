@@ -100,6 +100,116 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- 汇总卡片：上月跑步 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="#FFF3E0"
+                    android:padding="14dp"
+                    android:layout_marginEnd="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="上月跑步"
+                        android:textSize="12sp"
+                        android:textColor="#EF6C00"/>
+                    <TextView
+                        android:id="@+id/textLastMonthKm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 km"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="#EF6C00"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="#E1F5FE"
+                    android:padding="14dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="上月跑步时长"
+                        android:textSize="12sp"
+                        android:textColor="#0277BD"/>
+                    <TextView
+                        android:id="@+id/textLastMonthMin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 min"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="#0277BD"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 汇总卡片：本年跑步 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="#FCE4EC"
+                    android:padding="14dp"
+                    android:layout_marginEnd="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="本年跑步"
+                        android:textSize="12sp"
+                        android:textColor="#C2185B"/>
+                    <TextView
+                        android:id="@+id/textYearKm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 km"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="#C2185B"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="#E8EAF6"
+                    android:padding="14dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="本年跑步时长"
+                        android:textSize="12sp"
+                        android:textColor="#303F9F"/>
+                    <TextView
+                        android:id="@+id/textYearMin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 min"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="#303F9F"/>
+                </LinearLayout>
+            </LinearLayout>
+
             <!-- 跑步距离折线图（近30天） -->
             <TextView
                 android:layout_width="wrap_content"

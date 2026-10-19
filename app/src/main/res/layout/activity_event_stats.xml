@@ -47,6 +47,14 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- 事项日历：记录时间与提醒时间用不同标记 -->
+            <com.example.healthrecorder.event.EventCalendarView
+                android:id="@+id/eventCalendar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:elevation="1dp"/>
+
             <!-- 总览 -->
             <LinearLayout
                 android:layout_width="match_parent"

@@ -29,6 +29,8 @@ import com.example.healthrecorder.DatabaseHelper;
 public class ExerciseChartActivity extends AppCompatActivity {
     private final SimpleDateFormat FULL_FMT = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     private TextView textRunKm, textRunMin;
+    private TextView textLastMonthKm, textLastMonthMin;
+    private TextView textYearKm, textYearMin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,10 @@ public class ExerciseChartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_exercise_chart);
         textRunKm = findViewById(R.id.textRunKm);
         textRunMin = findViewById(R.id.textRunMin);
+        textLastMonthKm = findViewById(R.id.textLastMonthKm);
+        textLastMonthMin = findViewById(R.id.textLastMonthMin);
+        textYearKm = findViewById(R.id.textYearKm);
+        textYearMin = findViewById(R.id.textYearMin);
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         loadData();
     }
@@ -43,32 +49,41 @@ public class ExerciseChartActivity extends AppCompatActivity {
     private void loadData() {
         SQLiteDatabase db = new DatabaseHelper(this).getReadableDatabase();
 
-        // === 本月跑步统计 ===
-        Calendar calMonth = Calendar.getInstance();
-        calMonth.set(Calendar.DAY_OF_MONTH, 1);
-        calMonth.set(Calendar.HOUR_OF_DAY, 0);
-        calMonth.set(Calendar.MINUTE, 0);
-        calMonth.set(Calendar.SECOND, 0);
-        calMonth.set(Calendar.MILLISECOND, 0);
+        // === 时间区间（左闭右开）===
+        // 本月：本月 1 日 00:00 → 下月 1 日 00:00
+        Calendar calMonth = startOfMonth(Calendar.getInstance(), 0);
         long startMonth = calMonth.getTimeInMillis();
+        long endMonth = plusMonths(calMonth, 1).getTimeInMillis();
 
-        Cursor monthCursor = db.rawQuery(
-                "SELECT SUM(distance), SUM(duration) FROM exercise_records WHERE date>=? AND type=?",
-                new String[]{String.valueOf(startMonth), String.valueOf(ExerciseRecord.TYPE_RUNNING)});
-        float monthRunKm = 0f;
-        int monthRunMin = 0;
-        if (monthCursor.moveToFirst()) {
-            monthRunKm = monthCursor.isNull(0) ? 0f : monthCursor.getFloat(0);
-            monthRunMin = monthCursor.isNull(1) ? 0 : monthCursor.getInt(1);
-        }
-        monthCursor.close();
+        // 上月：上月 1 日 00:00 → 本月 1 日 00:00
+        Calendar calLastMonth = startOfMonth(Calendar.getInstance(), -1);
+        long startLastMonth = calLastMonth.getTimeInMillis();
+        long endLastMonth = startMonth;
 
-        textRunKm.setText(String.format(Locale.US, "%.1f km", monthRunKm));
-        textRunMin.setText(String.format(Locale.US, "%d min", monthRunMin));
+        // 本年：1 月 1 日 00:00 → 明年 1 月 1 日 00:00
+        Calendar calYear = Calendar.getInstance();
+        calYear.set(Calendar.DAY_OF_YEAR, 1);
+        clearTime(calYear);
+        long startYear = calYear.getTimeInMillis();
+        Calendar calYearEnd = (Calendar) calYear.clone();
+        calYearEnd.add(Calendar.YEAR, 1);
+        long endYear = calYearEnd.getTimeInMillis();
+
+        float[] month = sumRunning(db, startMonth, endMonth);
+        float[] lastMonth = sumRunning(db, startLastMonth, endLastMonth);
+        float[] year = sumRunning(db, startYear, endYear);
+
+        textRunKm.setText(String.format(Locale.US, "%.1f km", month[0]));
+        textRunMin.setText(String.format(Locale.US, "%d min", (int) month[1]));
+        textLastMonthKm.setText(String.format(Locale.US, "%.1f km", lastMonth[0]));
+        textLastMonthMin.setText(String.format(Locale.US, "%d min", (int) lastMonth[1]));
+        textYearKm.setText(String.format(Locale.US, "%.1f km", year[0]));
+        textYearMin.setText(String.format(Locale.US, "%d min", (int) year[1]));
 
         // === 近30天折线图 ===
-        Map<String, Float> runKm = new HashMap<>();
-        Map<String, Integer> runDur = new HashMap<>();
+        // 用 LinkedHashMap 保证按日期顺序插入，避免折线图横轴乱序
+        Map<String, Float> runKm = new java.util.LinkedHashMap<>();
+        Map<String, Integer> runDur = new java.util.LinkedHashMap<>();
         for (int i = 29; i >= 0; i--) {
             Calendar c = Calendar.getInstance();
             c.add(Calendar.DAY_OF_YEAR, -i);
@@ -105,8 +120,47 @@ public class ExerciseChartActivity extends AppCompatActivity {
         drawLineChart(findViewById(R.id.lineChartRunDur), floatMap(runDur), "#2196F3");
     }
 
+    /** 汇总指定区间内的跑步距离(km)与时长(分钟)，返回 [距离, 时长] */
+    private float[] sumRunning(SQLiteDatabase db, long startInclusive, long endExclusive) {
+        Cursor c = db.rawQuery(
+                "SELECT SUM(distance), SUM(duration) FROM exercise_records "
+                        + "WHERE date>=? AND date<? AND type=?",
+                new String[]{String.valueOf(startInclusive), String.valueOf(endExclusive),
+                        String.valueOf(ExerciseRecord.TYPE_RUNNING)});
+        float km = 0f;
+        int minutes = 0;
+        if (c.moveToFirst()) {
+            km = c.isNull(0) ? 0f : c.getFloat(0);
+            minutes = c.isNull(1) ? 0 : c.getInt(1);
+        }
+        c.close();
+        return new float[]{km, minutes};
+    }
+
+    private void clearTime(Calendar c) {
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+    }
+
+    /** 取相对当前月偏移 offset 个月的那个月的 1 日 00:00（offset=0 本月，-1 上月） */
+    private Calendar startOfMonth(Calendar base, int offset) {
+        Calendar c = (Calendar) base.clone();
+        c.set(Calendar.DAY_OF_MONTH, 1);
+        clearTime(c);
+        c.add(Calendar.MONTH, offset);
+        return c;
+    }
+
+    private Calendar plusMonths(Calendar base, int months) {
+        Calendar c = (Calendar) base.clone();
+        c.add(Calendar.MONTH, months);
+        return c;
+    }
+
     private Map<String, Float> floatMap(Map<String, Integer> src) {
-        Map<String, Float> r = new HashMap<>();
+        Map<String, Float> r = new java.util.LinkedHashMap<>();
         for (Map.Entry<String, Integer> e : src.entrySet()) r.put(e.getKey(), (float) e.getValue());
         return r;
     }

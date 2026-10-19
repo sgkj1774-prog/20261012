@@ -37,6 +37,15 @@ public class HealthApp extends Application {
         return appContext;
     }
 
+    /** 从包管理器读取真实版本号，避免崩溃日志里的版本号写死后过期 */
+    private String appVersion() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "unknown";
+        }
+    }
+
     private void saveCrashLog(Throwable throwable) {
         try {
             // 优先写到 /sdcard/（始终可写），备用 getFilesDir()
@@ -49,7 +58,7 @@ public class HealthApp extends Application {
                 pw.println("=== Crash Log ===");
                 pw.println("Time: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
                 pw.println("Device: " + Build.MANUFACTURER + " " + Build.MODEL + " (API " + Build.VERSION.SDK_INT + ")");
-                pw.println("App: HealthRecorder V1.4.3");
+                pw.println("App: HealthRecorder V" + appVersion());
                 pw.println();
                 throwable.printStackTrace(pw);
             }

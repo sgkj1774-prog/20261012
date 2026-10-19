@@ -20,6 +20,7 @@ import com.example.healthrecorder.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import com.example.healthrecorder.DatabaseHelper;
 
@@ -77,8 +78,10 @@ public class ExerciseRecordActivity extends AppCompatActivity {
         },
         selectedDateTime.get(Calendar.HOUR_OF_DAY), selectedDateTime.get(Calendar.MINUTE), true).show());
 
-        btnRunning.setOnClickListener(v -> {
-            selectedType = ExerciseRecord.TYPE_RUNNING;
+        // 地点：从历史地点中快速选择
+        findViewById(R.id.btnLocationHistory).setOnClickListener(v -> showLocationHistory());
+
+        btnRunning.setOnClickListener(v -> {            selectedType = ExerciseRecord.TYPE_RUNNING;
             updateTypeButtons(btnRunning, btnHiking);
         });
         btnHiking.setOnClickListener(v -> {
@@ -100,6 +103,22 @@ public class ExerciseRecordActivity extends AppCompatActivity {
         findViewById(R.id.btnSave).setOnClickListener(v -> save());
 
         if (editMode) loadForEdit();
+    }
+
+    /** 弹窗展示历史地点，点选后填入地点输入框 */
+    private void showLocationHistory() {
+        List<String> locations = repository.getExerciseLocations(30);
+        if (locations == null || locations.isEmpty()) {
+            Toast.makeText(ctx, "还没有历史地点，先手动输入一次就会记住", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final String[] items = locations.toArray(new String[0]);
+        new AlertDialog.Builder(ctx)
+                .setTitle("选择历史地点")
+                .setItems(items, (d, which) ->
+                        ((EditText) findViewById(R.id.editLocation)).setText(items[which]))
+                .setNegativeButton("取消", null)
+                .show();
     }
 
     private void updateTypeButtons(Button running, Button hiking) {

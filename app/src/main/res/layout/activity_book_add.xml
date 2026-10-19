@@ -139,6 +139,38 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- 开始阅读时间（v12 新增，精确到时分） -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="开始阅读时间（可选）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <Button
+                    android:id="@+id/btnStartDate"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="📅 开始日期"
+                    android:textSize="15sp"
+                    android:backgroundTint="#FF9800"
+                    android:layout_marginEnd="8dp"/>
+                <Button
+                    android:id="@+id/btnStartTime"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="🕐 开始时间"
+                    android:textSize="15sp"
+                    android:backgroundTint="#FF9800"/>
+            </LinearLayout>
+
             <!-- 进度提示 -->
             <TextView
                 android:id="@+id/tvProgress"
@@ -222,23 +254,49 @@
                     android:textColor="@color/star_inactive"/>
             </LinearLayout>
 
-            <!-- 读后感 -->
+            <!-- 整本读后感 -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="读后感"
+                android:text="整本读后感（可选）"
                 android:textSize="13sp"
                 android:textColor="#999999"
                 android:layout_marginBottom="6dp"/>
             <EditText
                 android:id="@+id/editNotes"
                 android:layout_width="match_parent"
-                android:layout_height="140dp"
+                android:layout_height="120dp"
                 android:hint="写下你的读后感..."
                 android:background="@android:color/white"
                 android:padding="12dp"
                 android:textSize="15sp"
                 android:gravity="top"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- 分段读后感：每条绑定一个页面区间 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="分段读后感（按页面区间）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="6dp"/>
+            <LinearLayout
+                android:id="@+id/layoutBookNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@android:color/white"
+                android:padding="8dp"
+                android:layout_marginBottom="8dp"/>
+            <Button
+                android:id="@+id/btnAddBookNote"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:text="➕ 添加段落读后感"
+                android:textSize="15sp"
+                android:backgroundTint="#FFB74D"
+                android:textColor="#FFFFFF"
                 android:layout_marginBottom="20dp"/>
 
             <Button

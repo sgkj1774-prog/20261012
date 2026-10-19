@@ -1,6 +1,7 @@
 package com.example.healthrecorder;
 
 import com.example.healthrecorder.breathing.BreathingRecord;
+import com.example.healthrecorder.book.BookNote;
 import com.example.healthrecorder.book.BookRecord;
 import com.example.healthrecorder.cat.CatFoodRecord;
 import com.example.healthrecorder.cat.CatRecord;
@@ -32,7 +33,8 @@ public class ExportHelper {
                                         List<BreathingRecord> breathingRecords,
                                         List<Event> events,
                                         List<BookRecord> bookRecords,
-                                        List<CatFoodRecord> catFoodRecords) throws Exception {
+                                        List<CatFoodRecord> catFoodRecords,
+                                        List<BookNote> bookNotes) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(baos, "UTF-8"));
         writer.write("\uFEFF");
@@ -139,16 +141,23 @@ public class ExportHelper {
 
         writer.write("=== 重要事项记录 ===");
         writer.newLine();
-        writer.write("日期,成员,标题,内容,优先级,状态,重复类型");
+        writer.write("日期,成员,标题,内容,优先级,状态,重复类型,提醒时间");
         writer.newLine();
         if (events != null) {
             for (Event ev : events) {
                 String userName = ev.getUserName() != null ? ev.getUserName() : "本人";
-                writer.write(String.format(Locale.US, "%s,%s,%s,%s,%s,%s,%s",
+                // 重要事项内容常为多行结构化文本，保留 \n（仅去掉 \r），
+                // 由 CSV 解析侧的多行引号处理负责还原
+                String evContent = ev.getContent() != null ? ev.getContent().replace("\r", "") : "";
+                // 提醒时间追加在末列：旧版本导入时读不到该列会自动忽略，保持向后兼容
+                String remindStr = (ev.isRemindEnabled() && ev.getRemindTime() != null)
+                        ? DATE_FORMAT.format(ev.getRemindTime()) : "";
+                writer.write(String.format(Locale.US, "%s,%s,%s,%s,%s,%s,%s,%s",
                         ev.getEventTime() != null ? DATE_FORMAT.format(ev.getEventTime()) : "",
                         escapeCsv(userName), escapeCsv(ev.getTitle()),
-                        escapeCsv(ev.getContent() != null ? ev.getContent() : ""),
-                        ev.getPriorityText(), ev.getStatusText(), ev.getRepeatText()));
+                        escapeCsv(evContent),
+                        ev.getPriorityText(), ev.getStatusText(), ev.getRepeatText(),
+                        remindStr));
                 writer.newLine();
             }
         }
@@ -156,18 +165,46 @@ public class ExportHelper {
 
         writer.write("=== 读书笔记记录 ===");
         writer.newLine();
-        writer.write("日期,成员,书名,作者,总页数,当前页,状态,评分,备注");
+        writer.write("日期,成员,书名,作者,总页数,当前页,状态,评分,备注,开始时间");
         writer.newLine();
         if (bookRecords != null) {
             for (BookRecord bk : bookRecords) {
                 String userName = bk.getUserName() != null ? bk.getUserName() : "本人";
-                String notes = bk.getNotes() != null ? bk.getNotes().replace("\r", "").replace("\n", " ") : "";
+                // 读后感是长文本，保留换行（仅去 \r），由解析侧的多行引号处理还原
+                String notes = bk.getNotes() != null ? bk.getNotes().replace("\r", "") : "";
                 String statusStr = bk.getStatusText();
-                writer.write(String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%s,%d,%s",
+                // 开始时间追加在末列，旧备份无此列时导入侧自动忽略
+                String startStr = bk.getStartAt() != null ? DATE_FORMAT.format(bk.getStartAt()) : "";
+                writer.write(String.format(Locale.US, "%s,%s,%s,%s,%d,%d,%s,%d,%s,%s",
                         bk.getCreatedAt() != null ? DATE_FORMAT.format(bk.getCreatedAt()) : "",
                         escapeCsv(userName), escapeCsv(bk.getTitle()), escapeCsv(bk.getAuthor()),
                         bk.getTotalPages(), bk.getCurrentPage(), statusStr,
-                        bk.getRating(), escapeCsv(notes)));
+                        bk.getRating(), escapeCsv(notes), startStr));
+                writer.newLine();
+            }
+        }
+        writer.newLine();
+
+        // ── 读后感明细（页面区间）────────────────────────────────────
+        // 单独一段，按「书名 + 成员」与上面的读书记录关联；旧版本导入会忽略本段
+        writer.write("=== 读后感明细 ===");
+        writer.newLine();
+        writer.write("书名,成员,起始页,结束页,内容,创建时间");
+        writer.newLine();
+        if (bookNotes != null && bookRecords != null) {
+            // bookId -> BookRecord 便于反查书名/成员
+            java.util.Map<Integer, BookRecord> bookById = new java.util.HashMap<>();
+            for (BookRecord bk : bookRecords) bookById.put(bk.getId(), bk);
+            for (BookNote n : bookNotes) {
+                BookRecord owner = bookById.get(n.getBookId());
+                if (owner == null) continue;
+                String userName = owner.getUserName() != null ? owner.getUserName() : "本人";
+                String content = n.getContent() != null
+                        ? n.getContent().replace("\r", "") : "";
+                writer.write(String.format(Locale.US, "%s,%s,%d,%d,%s,%s",
+                        escapeCsv(owner.getTitle()), escapeCsv(userName),
+                        n.getStartPage(), n.getEndPage(), escapeCsv(content),
+                        n.getCreatedAt() != null ? DATE_FORMAT.format(n.getCreatedAt()) : ""));
                 writer.newLine();
             }
         }
@@ -203,7 +240,8 @@ public class ExportHelper {
                                           List<BreathingRecord> breathingRecords,
                                           List<Event> events,
                                           List<BookRecord> bookRecords,
-                                          List<CatFoodRecord> catFoodRecords) throws Exception {
+                                          List<CatFoodRecord> catFoodRecords,
+                                          List<BookNote> bookNotes) throws Exception {
         Workbook workbook = new XSSFWorkbook();
 
         Sheet userSheet = workbook.createSheet("人员配置");
@@ -358,7 +396,7 @@ public class ExportHelper {
 
         // ── 重要事项 Sheet ──────────────────────────────────────────────
         Sheet eventSheet = workbook.createSheet("重要事项记录");
-        String[] evHeaders = {"日期","成员","标题","内容","优先级","状态","重复类型"};
+        String[] evHeaders = {"日期","成员","标题","内容","优先级","状态","重复类型","提醒时间"};
         Row evHeaderRow = eventSheet.createRow(0);
         for (int i = 0; i < evHeaders.length; i++) evHeaderRow.createCell(i).setCellValue(evHeaders[i]);
         int evRow = 1;
@@ -372,6 +410,8 @@ public class ExportHelper {
                 row.createCell(4).setCellValue(ev.getPriorityText());
                 row.createCell(5).setCellValue(ev.getStatusText());
                 row.createCell(6).setCellValue(ev.getRepeatText());
+                row.createCell(7).setCellValue((ev.isRemindEnabled() && ev.getRemindTime() != null)
+                        ? DATE_FORMAT.format(ev.getRemindTime()) : "");
             }
         }
         eventSheet.setColumnWidth(0, 18 * 256);
@@ -385,7 +425,7 @@ public class ExportHelper {
 
         // ── 读书笔记 Sheet ──────────────────────────────────────────────
         Sheet bookSheet = workbook.createSheet("读书笔记记录");
-        String[] bkHeaders = {"日期","成员","书名","作者","总页数","当前页","状态","评分","备注"};
+        String[] bkHeaders = {"日期","成员","书名","作者","总页数","当前页","状态","评分","备注","开始时间"};
         Row bkHeaderRow = bookSheet.createRow(0);
         for (int i = 0; i < bkHeaders.length; i++) bkHeaderRow.createCell(i).setCellValue(bkHeaders[i]);
         int bkRow = 1;
@@ -401,6 +441,7 @@ public class ExportHelper {
                 row.createCell(6).setCellValue(bk.getStatusText());
                 row.createCell(7).setCellValue(bk.getRating());
                 row.createCell(8).setCellValue(bk.getNotes() != null ? bk.getNotes() : "");
+                row.createCell(9).setCellValue(bk.getStartAt() != null ? DATE_FORMAT.format(bk.getStartAt()) : "");
             }
         }
         bookSheet.setColumnWidth(0, 18 * 256);
@@ -439,6 +480,34 @@ public class ExportHelper {
         catFoodSheet.setColumnWidth(5, 12 * 256);
         catFoodSheet.setColumnWidth(6, 16 * 256);
 
+        // ── 读后感明细 Sheet（页面区间）────────────────────────────────
+        Sheet noteSheet = workbook.createSheet("读后感明细");
+        String[] noteHeaders = {"书名","成员","起始页","结束页","内容","创建时间"};
+        Row noteHeaderRow = noteSheet.createRow(0);
+        for (int i = 0; i < noteHeaders.length; i++) noteHeaderRow.createCell(i).setCellValue(noteHeaders[i]);
+        int noteRow = 1;
+        if (bookNotes != null && bookRecords != null) {
+            java.util.Map<Integer, BookRecord> bookById = new java.util.HashMap<>();
+            for (BookRecord bk : bookRecords) bookById.put(bk.getId(), bk);
+            for (BookNote n : bookNotes) {
+                BookRecord owner = bookById.get(n.getBookId());
+                if (owner == null) continue;
+                Row row = noteSheet.createRow(noteRow++);
+                row.createCell(0).setCellValue(owner.getTitle() != null ? owner.getTitle() : "");
+                row.createCell(1).setCellValue(owner.getUserName() != null ? owner.getUserName() : "本人");
+                row.createCell(2).setCellValue(n.getStartPage());
+                row.createCell(3).setCellValue(n.getEndPage());
+                row.createCell(4).setCellValue(n.getContent() != null ? n.getContent() : "");
+                row.createCell(5).setCellValue(n.getCreatedAt() != null ? DATE_FORMAT.format(n.getCreatedAt()) : "");
+            }
+        }
+        noteSheet.setColumnWidth(0, 20 * 256);
+        noteSheet.setColumnWidth(1, 8 * 256);
+        noteSheet.setColumnWidth(2, 8 * 256);
+        noteSheet.setColumnWidth(3, 8 * 256);
+        noteSheet.setColumnWidth(4, 40 * 256);
+        noteSheet.setColumnWidth(5, 18 * 256);
+
         Font headerFont = workbook.createFont();
         headerFont.setBold(true);
         CellStyle headerStyle = workbook.createCellStyle();
@@ -452,6 +521,7 @@ public class ExportHelper {
         eventSheet.getRow(0).setRowStyle(headerStyle);
         bookSheet.getRow(0).setRowStyle(headerStyle);
         catFoodSheet.getRow(0).setRowStyle(headerStyle);
+        noteSheet.getRow(0).setRowStyle(headerStyle);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
         workbook.write(baos);
@@ -469,9 +539,9 @@ public class ExportHelper {
     }
 
     public static byte[] buildCsvBytes(List<Record> records, List<User> users) throws Exception {
-        return buildCsvBytes(records, users, null, null, null, null, null, null, null);
+        return buildCsvBytes(records, users, null, null, null, null, null, null, null, null);
     }
     public static byte[] buildExcelBytes(List<Record> records, List<User> users) throws Exception {
-        return buildExcelBytes(records, users, null, null, null, null, null, null, null);
+        return buildExcelBytes(records, users, null, null, null, null, null, null, null, null);
     }
 }
