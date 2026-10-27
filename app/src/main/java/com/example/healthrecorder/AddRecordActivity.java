@@ -49,7 +49,11 @@ public class AddRecordActivity extends AppCompatActivity {
         updateDateTimeDisplay();
         setupUserSpinner();
 
+        // 兼容两种 extra key：主页底部入口传 record_id，健康记录列表页传 edit_id
         editRecordId = getIntent().getIntExtra("record_id", -1);
+        if (editRecordId == -1) {
+            editRecordId = getIntent().getIntExtra("edit_id", -1);
+        }
         if (editRecordId != -1) {
             loadRecord(editRecordId);
         }
@@ -96,9 +100,14 @@ public class AddRecordActivity extends AppCompatActivity {
     private void loadRecord(int id) {
         Record record = repository.getRecordById(id);
         if (record != null) {
-            editWeight.setText(String.valueOf(record.getWeight()));
-            editSystolic.setText(String.valueOf(record.getSystolic()));
-            editDiastolic.setText(String.valueOf(record.getDiastolic()));
+            // 只回填实际存在的数据，避免把 0 写进空字段（保存时会被当成有效值）
+            if (record.hasWeight()) {
+                editWeight.setText(String.valueOf(record.getWeight()));
+            }
+            if (record.hasBloodPressure()) {
+                editSystolic.setText(String.valueOf(record.getSystolic()));
+                editDiastolic.setText(String.valueOf(record.getDiastolic()));
+            }
             editNotes.setText(record.getNotes());
             selectedDateTime.setTime(record.getDate());
             updateDateTimeDisplay();

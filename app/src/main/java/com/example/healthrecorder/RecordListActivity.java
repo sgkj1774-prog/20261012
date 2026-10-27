@@ -4,8 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -19,6 +22,10 @@ public class RecordListActivity extends AppCompatActivity {
     private List<Record> recordList = new ArrayList<>();
     private HealthRepository repository;
     private Context ctx;
+
+    private Spinner spinnerFilterUser;
+    private List<Integer> filterUserIds = new ArrayList<>();
+    private int filterUserId = -1;  // -1 = 全部成员
 
     private final ActivityResultLauncher<Intent> addLauncher =
     registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), r -> {
@@ -53,7 +60,37 @@ public class RecordListActivity extends AppCompatActivity {
         findViewById(R.id.btnChart).setOnClickListener(v ->
             startActivity(new Intent(ctx, ChartActivity.class)));
 
+        setupUserFilter();
         loadData();
+    }
+
+    /** 顶部成员筛选 */
+    private void setupUserFilter() {
+        spinnerFilterUser = findViewById(R.id.spinnerFilterUser);
+        List<String> names = new ArrayList<>();
+        filterUserIds.clear();
+        names.add("全部成员");
+        filterUserIds.add(-1);
+        for (User u : repository.getAllUsers()) {
+            names.add(u.getName());
+            filterUserIds.add(u.getId());
+        }
+        ArrayAdapter<String> adapterU = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, names);
+        adapterU.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerFilterUser.setAdapter(adapterU);
+        spinnerFilterUser.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                int newId = filterUserIds.get(position);
+                if (newId != filterUserId) {
+                    filterUserId = newId;
+                    loadData();
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     @Override
@@ -64,7 +101,11 @@ public class RecordListActivity extends AppCompatActivity {
 
     private void loadData() {
         recordList.clear();
-        recordList.addAll(repository.getAllRecords());
+        for (Record r : repository.getAllRecords()) {
+            if (filterUserId == -1 || r.getUserId() == filterUserId) {
+                recordList.add(r);
+            }
+        }
         adapter.notifyDataSetChanged();
 
         TextView tvEmpty = findViewById(R.id.tvEmpty);

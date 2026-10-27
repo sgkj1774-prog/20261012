@@ -15,12 +15,15 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 public class ChartActivity extends AppCompatActivity {
     private LineChart chartWeight, chartBP;
     private List<Record> allRecords;
+    /** 当前图表引用的数据列表（Entry 的 x 值 = 此列表下标），供点击气泡取详情 */
+    private final List<Record> chartRecords = new ArrayList<>();
     private HealthRepository repository;
     private Spinner spinnerRange;
     private Spinner spinnerChartUser;
@@ -47,6 +50,11 @@ public class ChartActivity extends AppCompatActivity {
 
         setupChart(chartWeight, "体重趋势 (kg)", Color.rgb(76, 175, 80));
         setupChart(chartBP, "血压变化 (mmHg)", Color.rgb(244, 67, 54));
+
+        // 点击数据点弹出气泡：时间 + 数值
+        ValueMarkerView marker = new ValueMarkerView(this, chartRecords);
+        chartWeight.setMarker(marker);
+        chartBP.setMarker(marker);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.chart_range_array, android.R.layout.simple_spinner_item);
@@ -149,6 +157,8 @@ public class ChartActivity extends AppCompatActivity {
         for (Record r : allRecords) {
             if (cutoff == 0 || r.getDate().getTime() >= cutoff) filtered.add(r);
         }
+        chartRecords.clear();
+        chartRecords.addAll(filtered);
 
         // Weight chart - 优化大数据量显示
         ArrayList<Entry> weightEntries = new ArrayList<>();
@@ -170,7 +180,31 @@ public class ChartActivity extends AppCompatActivity {
             weightSet.setDrawFilled(true);
             weightSet.setFillColor(Color.rgb(200, 230, 201));
             weightSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);  // 平滑曲线
-            chartWeight.setData(new LineData(weightSet));
+
+            LineData lineData = new LineData(weightSet);
+
+            // === 醒目标注最高/最低值（范围覆盖超过 90 天时只取最近 3 个月部分）===
+            long cutoff90 = now - 90L * 24 * 3600 * 1000;
+            Entry maxE = null, minE = null;
+            for (Entry e : weightEntries) {
+                Record r = chartRecords.get((int) e.getX());
+                if (r.getDate().getTime() < cutoff90) continue;
+                if (maxE == null || e.getY() > maxE.getY()) maxE = e;
+                if (minE == null || e.getY() < minE.getY()) minE = e;
+            }
+            if (maxE == null && !weightEntries.isEmpty()) {
+                // 图内没有近 90 天的数据，退化为标注全图极值
+                for (Entry e : weightEntries) {
+                    if (maxE == null || e.getY() > maxE.getY()) maxE = e;
+                    if (minE == null || e.getY() < minE.getY()) minE = e;
+                }
+            }
+            if (maxE != null) lineData.addDataSet(extremeSet(maxE, "最高", Color.rgb(244, 67, 54)));
+            if (minE != null && minE != maxE) {
+                lineData.addDataSet(extremeSet(minE, "最低", Color.rgb(33, 150, 243)));
+            }
+
+            chartWeight.setData(lineData);
             chartWeight.setVisibleXRangeMinimum(10f);
             chartWeight.moveViewToX(weightEntries.size() - 1);
         } else {
@@ -214,5 +248,26 @@ public class ChartActivity extends AppCompatActivity {
 
         chartWeight.invalidate();
         chartBP.invalidate();
+    }
+
+    /** 构造极值标注数据集：只画一个大圆点并带文字（如「最高 72.5」） */
+    private LineDataSet extremeSet(Entry e, String label, int color) {
+        LineDataSet set = new LineDataSet(
+                new ArrayList<>(Collections.singletonList(e)), label);
+        set.setColor(color);
+        set.setCircleColor(color);
+        set.setCircleHoleColor(Color.WHITE);
+        set.setCircleRadius(8f);
+        set.setLineWidth(0f);
+        set.setDrawValues(true);
+        set.setValueTextSize(12f);
+        set.setValueTextColor(color);
+        set.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getPointLabel(Entry entry) {
+                return label + " " + String.format(Locale.US, "%.1f", entry.getY());
+            }
+        });
+        return set;
     }
 }

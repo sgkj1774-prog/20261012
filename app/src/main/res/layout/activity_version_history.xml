@@ -49,6 +49,35 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="V1.4.10"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-10-27"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 修复：主页健康记录图标进入后，点击记录显示为空、无法编辑的问题\n• 体重趋势图：醒目标注最高值与最低值（默认取最近 3 个月），点击数据点可查看时间和体重\n• 健康记录列表：支持按成员筛选查看\n• 修复：编辑血压记录时体重输入框被误填为 0 的问题"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="V1.4.9"
                 android:textSize="16sp"
                 android:textColor="#212121"

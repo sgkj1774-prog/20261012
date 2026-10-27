@@ -77,8 +77,7 @@ public class RecordAdapter extends BaseAdapter {
         holder.textViewUser.setText(userName);
         int colorIdx = 0;
         try {
-            DatabaseHelper db = new DatabaseHelper(context);
-            User u = db.getUserById(record.getUserId());
+            User u = HealthRepository.getInstance(context).getUserById(record.getUserId());
             if (u != null) colorIdx = u.getColor();
         } catch (Exception ignored) {}
         int tagColor = userColors[colorIdx % userColors.length];

@@ -42,6 +42,31 @@
             android:textColor="#333333"/>
     </LinearLayout>
 
+    <!-- 成员筛选栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:background="#FFFFFF">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="成员"
+            android:textSize="13sp"
+            android:textColor="#999999"/>
+
+        <Spinner
+            android:id="@+id/spinnerFilterUser"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
     <!-- 列表 -->
     <ListView
         android:id="@+id/listView"
