@@ -58,7 +58,7 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
         android:paddingBottom="10dp"
-        android:text="点击药品可修改信息，长按可删除 · 补录历史打卡请到主页日历点对应日期"
+        android:text="点「✎编辑」可修改药品信息与包装资料，长按卡片可删除 · 补录历史打卡请到主页日历点对应日期"
         android:textSize="11sp"
         android:textColor="#AAAAAA"/>
 

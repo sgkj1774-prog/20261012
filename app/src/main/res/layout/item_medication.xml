@@ -4,12 +4,11 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:background="#FFFFFF"
+    android:background="@drawable/med_card_bg"
     android:layout_marginHorizontal="12dp"
     android:layout_marginTop="8dp"
     android:paddingHorizontal="14dp"
-    android:paddingVertical="14dp"
-    android:elevation="1dp">
+    android:paddingVertical="14dp">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -84,15 +83,34 @@
             android:textColor="#999999"/>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnTake"
-        android:layout_width="88dp"
-        android:layout_height="42dp"
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:text="标记已服"
-        android:textSize="13sp"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#BDBDBD"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"/>
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <Button
+            android:id="@+id/btnEdit"
+            android:layout_width="80dp"
+            android:layout_height="36dp"
+            android:text="✎ 编辑"
+            android:textSize="13sp"
+            android:textColor="#2196F3"
+            android:backgroundTint="#E3F2FD"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"/>
+
+        <Button
+            android:id="@+id/btnTake"
+            android:layout_width="80dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:text="标记已服"
+            android:textSize="13sp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#BDBDBD"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"/>
+    </LinearLayout>
 </LinearLayout>

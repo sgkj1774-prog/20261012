@@ -240,6 +240,7 @@ public class MedicationListActivity extends AppCompatActivity {
                 holder.notes = convertView.findViewById(R.id.tvMedNotes);
                 holder.stats = convertView.findViewById(R.id.tvMedStats);
                 holder.btnTake = convertView.findViewById(R.id.btnTake);
+                holder.btnEdit = convertView.findViewById(R.id.btnEdit);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -304,6 +305,7 @@ public class MedicationListActivity extends AppCompatActivity {
                         android.content.res.ColorStateList.valueOf(0xFFBDBDBD));
             }
             holder.btnTake.setOnClickListener(v -> toggleToday(m));
+            holder.btnEdit.setOnClickListener(v -> openEdit(m));
 
             return convertView;
         }
@@ -311,6 +313,6 @@ public class MedicationListActivity extends AppCompatActivity {
 
     private static class ViewHolder {
         TextView name, dosage, schedule, detail, expiry, notes, stats;
-        Button btnTake;
+        Button btnTake, btnEdit;
     }
 }

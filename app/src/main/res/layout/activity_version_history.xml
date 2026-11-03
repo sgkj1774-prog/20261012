@@ -49,7 +49,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="V1.4.13"
+                android:text="V1.4.14"
                 android:textSize="16sp"
                 android:textColor="#212121"
                 android:textStyle="bold"/>
@@ -63,7 +63,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• 主页日历点任意日期，可直接为该日补录或取消服药打卡（未来日期不可打卡）\n• 日详情页长按某种药可写当日备注（如漏服原因），备注随之导出\n• 药品档案支持编辑：点击卡片修改，长按弹出「编辑药品信息 / 删除药品」菜单\n• 服药列表顶部新增操作提示"
+                android:text="• 药品档案改为清晰卡片式展示（圆角描边卡片）\n• 每张卡片新增「✎ 编辑」按钮，点一下即可修改药品信息与包装资料；长按卡片仍可删除\n• 服药列表顶部操作提示更新"
                 android:textSize="14sp"
                 android:textColor="#666666"
                 android:lineSpacingExtra="4dp"
