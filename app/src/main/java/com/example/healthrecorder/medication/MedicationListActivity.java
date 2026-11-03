@@ -224,6 +224,8 @@ public class MedicationListActivity extends AppCompatActivity {
                 holder.name = convertView.findViewById(R.id.tvMedName);
                 holder.dosage = convertView.findViewById(R.id.tvMedDosage);
                 holder.schedule = convertView.findViewById(R.id.tvMedSchedule);
+                holder.detail = convertView.findViewById(R.id.tvMedDetail);
+                holder.expiry = convertView.findViewById(R.id.tvMedExpiry);
                 holder.notes = convertView.findViewById(R.id.tvMedNotes);
                 holder.stats = convertView.findViewById(R.id.tvMedStats);
                 holder.btnTake = convertView.findViewById(R.id.btnTake);
@@ -243,6 +245,30 @@ public class MedicationListActivity extends AppCompatActivity {
             }
 
             holder.schedule.setText(m.getScheduleText());
+
+            String detail = m.getSpecSummary();
+            if (detail != null) {
+                holder.detail.setVisibility(View.VISIBLE);
+                holder.detail.setText(detail);
+            } else {
+                holder.detail.setVisibility(View.GONE);
+            }
+
+            String expiry = m.getExpirySummary();
+            if (expiry != null) {
+                holder.expiry.setVisibility(View.VISIBLE);
+                holder.expiry.setText(expiry);
+                int state = m.getExpiryState();
+                if (state == Medication.EXPIRY_EXPIRED) {
+                    holder.expiry.setTextColor(0xFFE53935);
+                } else if (state == Medication.EXPIRY_SOON) {
+                    holder.expiry.setTextColor(0xFFFB8C00);
+                } else {
+                    holder.expiry.setTextColor(0xFF999999);
+                }
+            } else {
+                holder.expiry.setVisibility(View.GONE);
+            }
 
             if (m.getNotes() != null && !m.getNotes().trim().isEmpty()) {
                 holder.notes.setVisibility(View.VISIBLE);
@@ -273,7 +299,7 @@ public class MedicationListActivity extends AppCompatActivity {
     }
 
     private static class ViewHolder {
-        TextView name, dosage, schedule, notes, stats;
+        TextView name, dosage, schedule, detail, expiry, notes, stats;
         Button btnTake;
     }
 }

@@ -565,8 +565,9 @@ public class ImportHelper {
         }
     }
 
-    // ── 服药档案 / 打卡（v13）────────────────────────────────────
-    // 列：药品名,成员,剂量,服用时段,服用时间,备注,创建日期
+    // ── 服药档案 / 打卡（v13；v14 追加包装信息列）────────────────────
+    // 列：药品名,成员,剂量,服用时段,服用时间,备注,创建日期,
+    //     生产日期,有效期至,规格,批准文号,上市许可持有人,生产厂,包装厂,企业地址
     private static com.example.healthrecorder.medication.Medication parseMedicationLine(String rawLine) {
         List<String> f = splitCsvLine(rawLine);
         if (f.isEmpty()) return null;
@@ -582,11 +583,26 @@ public class ImportHelper {
             if (f.size() > 4) m.setTimeText(f.get(4).trim().isEmpty() ? null : f.get(4).trim());
             if (f.size() > 5) m.setNotes(f.get(5).trim().isEmpty() ? null : f.get(5).trim());
             if (f.size() > 6) m.setCreatedAt(parseDate(f.get(6).trim()));
+            // v14 包装信息：旧备份只有 7 列，越界即跳过
+            if (f.size() > 7) m.setProductionDate(emptyToNull(normalizeDayKey(f.get(7))));
+            if (f.size() > 8) m.setExpiryDate(emptyToNull(normalizeDayKey(f.get(8))));
+            if (f.size() > 9) m.setSpec(emptyToNull(f.get(9).trim()));
+            if (f.size() > 10) m.setApprovalNo(emptyToNull(f.get(10).trim()));
+            if (f.size() > 11) m.setMah(emptyToNull(f.get(11).trim()));
+            if (f.size() > 12) m.setManufacturer(emptyToNull(f.get(12).trim()));
+            if (f.size() > 13) m.setPacker(emptyToNull(f.get(13).trim()));
+            if (f.size() > 14) m.setCompanyAddress(emptyToNull(f.get(14).trim()));
             m.setActive(true);
             return m;
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private static String emptyToNull(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
     }
 
     // 列：药品名,成员,日期,是否已服,实际服用时间,备注
@@ -1125,7 +1141,9 @@ public class ImportHelper {
     }
 
     // 读后感明细 Sheet 列：0=书名,1=成员,2=起始页,3=结束页,4=内容,5=创建时间
-    // 服药档案 Sheet 列：0=药品名,1=成员,2=剂量,3=服用时段,4=服用时间,5=备注,6=创建日期
+    // 服药档案 Sheet 列：0=药品名,1=成员,2=剂量,3=服用时段,4=服用时间,5=备注,6=创建日期,
+    //                    7=生产日期,8=有效期至,9=规格,10=批准文号,11=上市许可持有人,
+    //                    12=生产厂,13=包装厂,14=企业地址
     private static com.example.healthrecorder.medication.Medication parseMedicationRow(Row row) {
         try {
             String name = cellToString(row.getCell(0)).trim();
@@ -1144,6 +1162,15 @@ public class ImportHelper {
             m.setNotes(notes.isEmpty() ? null : notes);
             String created = cellToString(row.getCell(6)).trim();
             if (!created.isEmpty()) m.setCreatedAt(parseDate(created));
+            // v14 包装信息（旧文件无这些列，cell 为 null 时自然跳过）
+            m.setProductionDate(emptyToNull(normalizeDayKey(cellToString(row.getCell(7)))));
+            m.setExpiryDate(emptyToNull(normalizeDayKey(cellToString(row.getCell(8)))));
+            m.setSpec(emptyToNull(cellToString(row.getCell(9))));
+            m.setApprovalNo(emptyToNull(cellToString(row.getCell(10))));
+            m.setMah(emptyToNull(cellToString(row.getCell(11))));
+            m.setManufacturer(emptyToNull(cellToString(row.getCell(12))));
+            m.setPacker(emptyToNull(cellToString(row.getCell(13))));
+            m.setCompanyAddress(emptyToNull(cellToString(row.getCell(14))));
             m.setActive(true);
             return m;
         } catch (Exception e) {

@@ -49,6 +49,35 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="V1.4.12"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-11-03"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 修复重要事项页「服药记录」图标显示不完整（只露出左侧一小部分）\n• 新增药品支持登记包装信息：生产日期、有效期至、规格、批准文号、上市许可持有人、生产厂、包装厂、企业地址\n• 药品列表展示规格与批准文号，有效期已过期标红、30 天内临期标橙\n• 导出导入同步新增 8 列，旧版 7 列备份仍可正常导入\n• 数据库升级到 v14"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="V1.4.11"
                 android:textSize="16sp"
                 android:textColor="#212121"

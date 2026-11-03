@@ -13,7 +13,7 @@ import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "health_recorder.db";
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 14;
 
     static final String TABLE_RECORDS = "records";
     static final String TABLE_USERS = "users";
@@ -174,7 +174,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + "user_id INTEGER DEFAULT 1"
                 + ")");
 
-        // 服药档案（v13）：一种药一条
+        // 服药档案（v13）：一种药一条；v14 增加包装信息 8 列
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MEDICATIONS + " ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "name TEXT NOT NULL,"
@@ -184,7 +184,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + "notes TEXT,"
                 + "active INTEGER DEFAULT 1,"
                 + "created_at INTEGER,"
-                + "user_id INTEGER DEFAULT 1"
+                + "user_id INTEGER DEFAULT 1,"
+                + "production_date TEXT,"
+                + "expiry_date TEXT,"
+                + "spec TEXT,"
+                + "approval_no TEXT,"
+                + "mah TEXT,"
+                + "manufacturer TEXT,"
+                + "packer TEXT,"
+                + "company_address TEXT"
                 + ")");
 
         // 服药打卡（v13）：一种药每天最多一条
@@ -370,6 +378,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + ")");
             db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS idx_med_log_unique ON "
                     + TABLE_MED_LOGS + "(med_id, log_date)");
+        }
+        if (oldVersion < 14) {
+            // 药品包装信息（全部可选，日期存 yyyy-MM-dd 文本）
+            String[] cols = {
+                    "production_date", "expiry_date", "spec", "approval_no",
+                    "mah", "manufacturer", "packer", "company_address"
+            };
+            for (String col : cols) {
+                try { db.execSQL("ALTER TABLE " + TABLE_MEDICATIONS + " ADD COLUMN " + col + " TEXT"); } catch (Exception ignored) {}
+            }
         }
     }
 
@@ -1539,7 +1557,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         m.setUserId(c.getInt(c.getColumnIndexOrThrow("user_id")));
         int unIdx = c.getColumnIndex("un");
         if (unIdx >= 0) m.setUserName(c.getString(unIdx));
+        // v14 新增列，老库/旧游标缺失时静默跳过
+        m.setProductionDate(optText(c, "production_date"));
+        m.setExpiryDate(optText(c, "expiry_date"));
+        m.setSpec(optText(c, "spec"));
+        m.setApprovalNo(optText(c, "approval_no"));
+        m.setMah(optText(c, "mah"));
+        m.setManufacturer(optText(c, "manufacturer"));
+        m.setPacker(optText(c, "packer"));
+        m.setCompanyAddress(optText(c, "company_address"));
         return m;
+    }
+
+    /** 读可空文本列，列不存在或值为 NULL 时返回 null */
+    private static String optText(Cursor c, String column) {
+        int idx = c.getColumnIndex(column);
+        if (idx < 0 || c.isNull(idx)) return null;
+        return c.getString(idx);
+    }
+
+    /** 药品包装信息写入 ContentValues（新增/编辑共用） */
+    private void putMedicationExtra(ContentValues v, com.example.healthrecorder.medication.Medication m) {
+        v.put("production_date", trimToNull(m.getProductionDate()));
+        v.put("expiry_date", trimToNull(m.getExpiryDate()));
+        v.put("spec", trimToNull(m.getSpec()));
+        v.put("approval_no", trimToNull(m.getApprovalNo()));
+        v.put("mah", trimToNull(m.getMah()));
+        v.put("manufacturer", trimToNull(m.getManufacturer()));
+        v.put("packer", trimToNull(m.getPacker()));
+        v.put("company_address", trimToNull(m.getCompanyAddress()));
+    }
+
+    private static String trimToNull(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
     }
 
     public long addMedication(com.example.healthrecorder.medication.Medication m) {
@@ -1553,6 +1605,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         v.put("active", m.isActive() ? 1 : 0);
         v.put("created_at", m.getCreatedAt() != null ? m.getCreatedAt().getTime() : System.currentTimeMillis());
         v.put("user_id", m.getUserId());
+        putMedicationExtra(v, m);
         long id = db.insert(TABLE_MEDICATIONS, null, v);
         db.close();
         return id;
@@ -1568,6 +1621,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         v.put("notes", m.getNotes());
         v.put("active", m.isActive() ? 1 : 0);
         v.put("user_id", m.getUserId());
+        putMedicationExtra(v, m);
         db.update(TABLE_MEDICATIONS, v, "id=?", new String[]{String.valueOf(m.getId())});
         db.close();
     }

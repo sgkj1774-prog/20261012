@@ -233,22 +233,31 @@ public class ExportHelper {
             }
         }
 
-        // ── 服药档案（v13）──────────────────────────────────────────
+        // ── 服药档案（v13，v14 追加包装信息列）────────────────────────
         writer.write("=== 服药档案 ===");
         writer.newLine();
-        writer.write("药品名,成员,剂量,服用时段,服用时间,备注,创建日期");
+        writer.write("药品名,成员,剂量,服用时段,服用时间,备注,创建日期,"
+                + "生产日期,有效期至,规格,批准文号,上市许可持有人,生产厂,包装厂,企业地址");
         writer.newLine();
         if (medications != null) {
             for (Medication m : medications) {
                 String userName = m.getUserName() != null ? m.getUserName() : "本人";
                 String notes = m.getNotes() != null ? m.getNotes().replace("\r", "") : "";
-                writer.write(String.format(Locale.US, "%s,%s,%s,%s,%s,%s,%s",
+                writer.write(String.format(Locale.US, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
                         escapeCsv(m.getName()), escapeCsv(userName),
                         escapeCsv(m.getDosage()),
                         Medication.timingText(m.getTiming()),
                         m.getTimeText() != null ? m.getTimeText() : "",
                         escapeCsv(notes),
-                        m.getCreatedAt() != null ? DATE_FORMAT.format(m.getCreatedAt()) : ""));
+                        m.getCreatedAt() != null ? DATE_FORMAT.format(m.getCreatedAt()) : "",
+                        escapeCsv(m.getProductionDate()),
+                        escapeCsv(m.getExpiryDate()),
+                        escapeCsv(m.getSpec()),
+                        escapeCsv(m.getApprovalNo()),
+                        escapeCsv(m.getMah()),
+                        escapeCsv(m.getManufacturer()),
+                        escapeCsv(m.getPacker()),
+                        escapeCsv(m.getCompanyAddress())));
                 writer.newLine();
             }
         }
@@ -560,9 +569,10 @@ public class ExportHelper {
         noteSheet.setColumnWidth(4, 40 * 256);
         noteSheet.setColumnWidth(5, 18 * 256);
 
-        // ── 服药档案 Sheet（v13）────────────────────────────────────
+        // ── 服药档案 Sheet（v13，v14 追加包装信息列）──────────────────
         Sheet medSheet = workbook.createSheet("服药档案");
-        String[] medHeaders = {"药品名","成员","剂量","服用时段","服用时间","备注","创建日期"};
+        String[] medHeaders = {"药品名","成员","剂量","服用时段","服用时间","备注","创建日期",
+                "生产日期","有效期至","规格","批准文号","上市许可持有人","生产厂","包装厂","企业地址"};
         Row medHeaderRow = medSheet.createRow(0);
         for (int i = 0; i < medHeaders.length; i++) medHeaderRow.createCell(i).setCellValue(medHeaders[i]);
         int medRow = 1;
@@ -576,6 +586,14 @@ public class ExportHelper {
                 row.createCell(4).setCellValue(m.getTimeText() != null ? m.getTimeText() : "");
                 row.createCell(5).setCellValue(m.getNotes() != null ? m.getNotes() : "");
                 row.createCell(6).setCellValue(m.getCreatedAt() != null ? DATE_FORMAT.format(m.getCreatedAt()) : "");
+                row.createCell(7).setCellValue(m.getProductionDate() != null ? m.getProductionDate() : "");
+                row.createCell(8).setCellValue(m.getExpiryDate() != null ? m.getExpiryDate() : "");
+                row.createCell(9).setCellValue(m.getSpec() != null ? m.getSpec() : "");
+                row.createCell(10).setCellValue(m.getApprovalNo() != null ? m.getApprovalNo() : "");
+                row.createCell(11).setCellValue(m.getMah() != null ? m.getMah() : "");
+                row.createCell(12).setCellValue(m.getManufacturer() != null ? m.getManufacturer() : "");
+                row.createCell(13).setCellValue(m.getPacker() != null ? m.getPacker() : "");
+                row.createCell(14).setCellValue(m.getCompanyAddress() != null ? m.getCompanyAddress() : "");
             }
         }
         medSheet.setColumnWidth(0, 16 * 256);
@@ -585,6 +603,14 @@ public class ExportHelper {
         medSheet.setColumnWidth(4, 10 * 256);
         medSheet.setColumnWidth(5, 30 * 256);
         medSheet.setColumnWidth(6, 18 * 256);
+        medSheet.setColumnWidth(7, 14 * 256);
+        medSheet.setColumnWidth(8, 14 * 256);
+        medSheet.setColumnWidth(9, 16 * 256);
+        medSheet.setColumnWidth(10, 20 * 256);
+        medSheet.setColumnWidth(11, 26 * 256);
+        medSheet.setColumnWidth(12, 26 * 256);
+        medSheet.setColumnWidth(13, 26 * 256);
+        medSheet.setColumnWidth(14, 34 * 256);
 
         // ── 服药打卡 Sheet（v13）────────────────────────────────────
         Sheet medLogSheet = workbook.createSheet("服药打卡");

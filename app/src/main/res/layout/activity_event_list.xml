@@ -40,33 +40,40 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Button
+            <!-- 图标入口统一用 TextView：Button 自带水平内边距会把 emoji 挤到框外 -->
+            <TextView
                 android:id="@+id/btnMedication"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:text="💊"
-                android:textSize="16sp"
-                android:background="@android:color/transparent"
-                android:textColor="#333333"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:padding="0dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="服药记录"/>
 
-            <Button
+            <TextView
                 android:id="@+id/btnMembers"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:text="👤"
-                android:textSize="16sp"
-                android:background="@android:color/transparent"
-                android:textColor="#333333"/>
+                android:textSize="18sp"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:padding="0dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"/>
 
-            <Button
+            <TextView
                 android:id="@+id/btnDataManagement"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:text="📊"
-                android:textSize="16sp"
-                android:background="@android:color/transparent"
-                android:textColor="#333333"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:padding="0dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="数据统计"/>
         </LinearLayout>
     </LinearLayout>

@@ -52,6 +52,22 @@
             android:textColor="#666666"/>
 
         <TextView
+            android:id="@+id/tvMedDetail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="12sp"
+            android:textColor="#666666"/>
+
+        <TextView
+            android:id="@+id/tvMedExpiry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="12sp"
+            android:textColor="#999999"/>
+
+        <TextView
             android:id="@+id/tvMedNotes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

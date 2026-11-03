@@ -154,6 +154,205 @@
                 android:inputType="textMultiLine"
                 android:layout_marginBottom="20dp"/>
 
+            <!-- ================= 药品包装信息（选填） ================= -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="药品包装信息（选填）"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#2196F3"
+                android:layout_marginBottom="10dp"/>
+
+            <!-- 生产日期 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="药品生产日期"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="14dp">
+
+                <TextView
+                    android:id="@+id/textProductionDate"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="点击选择"
+                    android:background="@android:color/white"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="15sp"
+                    android:textColor="#999999"/>
+
+                <TextView
+                    android:id="@+id/btnClearProduction"
+                    android:layout_width="48dp"
+                    android:layout_height="50dp"
+                    android:gravity="center"
+                    android:text="清除"
+                    android:textSize="12sp"
+                    android:textColor="#2196F3"/>
+            </LinearLayout>
+
+            <!-- 有效期至 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="有效期至"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="14dp">
+
+                <TextView
+                    android:id="@+id/textExpiryDate"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="点击选择"
+                    android:background="@android:color/white"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="15sp"
+                    android:textColor="#999999"/>
+
+                <TextView
+                    android:id="@+id/btnClearExpiry"
+                    android:layout_width="48dp"
+                    android:layout_height="50dp"
+                    android:gravity="center"
+                    android:text="清除"
+                    android:textSize="12sp"
+                    android:textColor="#2196F3"/>
+            </LinearLayout>
+
+            <!-- 规格 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="规格"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editSpec"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="如：50μg×100片"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:textSize="15sp"
+                android:inputType="text"
+                android:layout_marginBottom="14dp"/>
+
+            <!-- 批准文号 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="批准文号"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editApprovalNo"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="如：国药准字H20100523"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:textSize="15sp"
+                android:inputType="text"
+                android:layout_marginBottom="14dp"/>
+
+            <!-- 上市许可持有人 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="上市许可持有人"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editMah"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="如：默克制药（江苏）有限公司"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:textSize="15sp"
+                android:inputType="text"
+                android:layout_marginBottom="14dp"/>
+
+            <!-- 生产厂 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="生产厂"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editManufacturer"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="药品生产企业名称"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:textSize="15sp"
+                android:inputType="text"
+                android:layout_marginBottom="14dp"/>
+
+            <!-- 包装厂 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="包装厂"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editPacker"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="药品包装企业名称"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:textSize="15sp"
+                android:inputType="text"
+                android:layout_marginBottom="14dp"/>
+
+            <!-- 企业地址 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="企业地址"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editCompanyAddress"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:hint="生产企业注册地址"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:textSize="15sp"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:layout_marginBottom="20dp"/>
+
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
