@@ -24,15 +24,19 @@ public class MedicationAddActivity extends AppCompatActivity {
 
     private EditText editName, editDosage, editNotes;
     private EditText editSpec, editApprovalNo, editMah, editManufacturer, editPacker, editCompanyAddress;
+    private EditText editBatchNo;
     private Spinner spinnerTiming;
     private TextView textTime, tvTitle, btnClearTime;
     private TextView textProductionDate, textExpiryDate;
+    private TextView textStartDate, textEndDate;
     private HealthRepository repository;
 
     private int editId = -1;
     private String timeText = null;   // HH:mm，null 表示未设置
     private String productionDate = null; // yyyy-MM-dd
     private String expiryDate = null;
+    private String startDate = null;  // 起始服用日期
+    private String endDate = null;    // 截止日期
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +54,15 @@ public class MedicationAddActivity extends AppCompatActivity {
         editManufacturer = findViewById(R.id.editManufacturer);
         editPacker = findViewById(R.id.editPacker);
         editCompanyAddress = findViewById(R.id.editCompanyAddress);
+        editBatchNo = findViewById(R.id.editBatchNo);
         spinnerTiming = findViewById(R.id.spinnerTiming);
         textTime = findViewById(R.id.textTime);
         tvTitle = findViewById(R.id.tvTitle);
         btnClearTime = findViewById(R.id.btnClearTime);
         textProductionDate = findViewById(R.id.textProductionDate);
         textExpiryDate = findViewById(R.id.textExpiryDate);
+        textStartDate = findViewById(R.id.textStartDate);
+        textEndDate = findViewById(R.id.textEndDate);
 
         ArrayAdapter<String> timingAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
@@ -82,6 +89,17 @@ public class MedicationAddActivity extends AppCompatActivity {
             updateDateDisplay();
         });
 
+        textStartDate.setOnClickListener(v -> pickCycleDate(true));
+        textEndDate.setOnClickListener(v -> pickCycleDate(false));
+        findViewById(R.id.btnClearStart).setOnClickListener(v -> {
+            startDate = null;
+            updateCycleDateDisplay();
+        });
+        findViewById(R.id.btnClearEnd).setOnClickListener(v -> {
+            endDate = null;
+            updateCycleDateDisplay();
+        });
+
         editId = getIntent().getIntExtra("edit_id", -1);
         if (editId != -1) {
             tvTitle.setText("💊 编辑药品");
@@ -89,6 +107,7 @@ public class MedicationAddActivity extends AppCompatActivity {
         }
         updateTimeDisplay();
         updateDateDisplay();
+        updateCycleDateDisplay();
 
         findViewById(R.id.btnSave).setOnClickListener(v -> save());
     }
@@ -110,6 +129,9 @@ public class MedicationAddActivity extends AppCompatActivity {
         editCompanyAddress.setText(m.getCompanyAddress());
         productionDate = m.getProductionDate();
         expiryDate = m.getExpiryDate();
+        startDate = m.getStartDate();
+        endDate = m.getEndDate();
+        editBatchNo.setText(m.getBatchNo());
     }
 
     /** 选日期：已有值则定位到那一年，否则默认今天 */
@@ -129,6 +151,25 @@ public class MedicationAddActivity extends AppCompatActivity {
     private void updateDateDisplay() {
         setDateText(textProductionDate, productionDate);
         setDateText(textExpiryDate, expiryDate);
+    }
+
+    /** 选服用周期日期：已有值则定位，否则默认今天 */
+    private void pickCycleDate(final boolean start) {
+        Calendar c = Medication.parseDate(start ? startDate : endDate);
+        if (c == null) c = Calendar.getInstance();
+        new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                if (start) startDate = Medication.formatDate(year, month, dayOfMonth);
+                else endDate = Medication.formatDate(year, month, dayOfMonth);
+                updateCycleDateDisplay();
+            }
+        }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void updateCycleDateDisplay() {
+        setDateText(textStartDate, startDate);
+        setDateText(textEndDate, endDate);
     }
 
     private void setDateText(TextView tv, String value) {
@@ -199,6 +240,9 @@ public class MedicationAddActivity extends AppCompatActivity {
         m.setManufacturer(textOrNull(editManufacturer));
         m.setPacker(textOrNull(editPacker));
         m.setCompanyAddress(textOrNull(editCompanyAddress));
+        m.setBatchNo(textOrNull(editBatchNo));
+        m.setStartDate(startDate);
+        m.setEndDate(endDate);
 
         if (editId == -1) {
             m.setUserId(1);

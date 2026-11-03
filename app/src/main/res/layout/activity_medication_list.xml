@@ -58,9 +58,21 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
         android:paddingBottom="10dp"
-        android:text="点「✎编辑」可修改药品信息与包装资料，长按卡片可删除 · 补录历史打卡请到主页日历点对应日期"
+        android:text="点「✎编辑」可修改药品信息与包装资料，长按卡片可归档/恢复/删除 · 补录历史打卡请到主页日历点对应日期"
         android:textSize="11sp"
         android:textColor="#AAAAAA"/>
+
+    <!-- 已归档展开开关 -->
+    <TextView
+        android:id="@+id/tvArchivedToggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="6dp"
+        android:text="已归档（0）▸ 点击展开"
+        android:textSize="12sp"
+        android:textColor="#2196F3"
+        android:visibility="gone"/>
 
     <!-- 列表 -->
     <ListView

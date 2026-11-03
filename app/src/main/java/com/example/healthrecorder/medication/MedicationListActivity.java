@@ -33,18 +33,21 @@ import java.util.Set;
 
 /**
  * 服药记录：药品档案列表 + 每日打卡。
- * 打卡粒度是「一种药一天一条」，重复点击即取消。
+ * 每个 medications 行 = 一个服药周期 / 一批药；截止日期过后自动归档。
  */
 public class MedicationListActivity extends AppCompatActivity {
 
     private ListView listView;
-    private TextView tvSummary, tvEmpty;
-    private MedAdapter adapter;
+    private TextView tvSummary, tvEmpty, tvArchivedToggle;
+    private MedListAdapter adapter;
     private HealthRepository repository;
 
-    private final List<Medication> meds = new ArrayList<>();
+    private final List<Object> items = new ArrayList<>();
+    private final List<Medication> activeMeds = new ArrayList<>();
+    private final List<Medication> archivedMeds = new ArrayList<>();
     private final Map<Integer, String> statsMap = new HashMap<>();
     private final Map<Integer, Boolean> todayMap = new HashMap<>();
+    private boolean showArchived = false;
 
     private final ActivityResultLauncher<Intent> addLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), r -> {
@@ -61,8 +64,9 @@ public class MedicationListActivity extends AppCompatActivity {
         listView = findViewById(R.id.listView);
         tvSummary = findViewById(R.id.tvSummary);
         tvEmpty = findViewById(R.id.tvEmpty);
+        tvArchivedToggle = findViewById(R.id.tvArchivedToggle);
 
-        adapter = new MedAdapter(this);
+        adapter = new MedListAdapter(this);
         listView.setAdapter(adapter);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
@@ -71,10 +75,9 @@ public class MedicationListActivity extends AppCompatActivity {
             addLauncher.launch(intent);
         });
 
-        listView.setOnItemClickListener((parent, view, position, id) -> openEdit(meds.get(position)));
-        listView.setOnItemLongClickListener((parent, view, position, id) -> {
-            showActions(meds.get(position));
-            return true;
+        tvArchivedToggle.setOnClickListener(v -> {
+            showArchived = !showArchived;
+            loadData();
         });
 
         loadData();
@@ -92,13 +95,33 @@ public class MedicationListActivity extends AppCompatActivity {
         addLauncher.launch(intent);
     }
 
-    /** 长按弹操作菜单：编辑 / 删除 */
+    /** 长按弹操作菜单：归档/恢复 / 编辑 / 删除 */
     private void showActions(final Medication m) {
+        List<String> opts = new ArrayList<>();
+        if (m.isArchivedState()) opts.add("恢复（取消归档）");
+        else opts.add("归档");
+        opts.add("编辑药品信息");
+        opts.add("删除药品");
         new AlertDialog.Builder(this)
-                .setTitle(m.getName())
-                .setItems(new String[]{"编辑药品信息", "删除药品"}, (d, which) -> {
-                    if (which == 0) openEdit(m);
-                    else confirmDelete(m);
+                .setTitle(m.getName() + (m.getBatchNo() != null ? "（批号 " + m.getBatchNo() + "）" : ""))
+                .setItems(opts.toArray(new String[0]), (d, which) -> {
+                    String choice = opts.get(which);
+                    if ("归档".equals(choice)) {
+                        repository.setMedicationArchived(m.getId(), true);
+                        loadData();
+                    } else if ("恢复（取消归档）".equals(choice)) {
+                        repository.setMedicationArchived(m.getId(), false);
+                        if (m.isExpired()) {
+                            Toast.makeText(this,
+                                    "已取消归档；但该周期截止日期已过，请在编辑页调整截止日期以重新启用每日打卡",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        loadData();
+                    } else if ("编辑药品信息".equals(choice)) {
+                        openEdit(m);
+                    } else {
+                        confirmDelete(m);
+                    }
                 })
                 .show();
     }
@@ -116,41 +139,65 @@ public class MedicationListActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        meds.clear();
         List<Medication> all = repository.getAllMedications();
-        if (all != null) meds.addAll(all);
-
-        String today = DatabaseHelper.DATE_KEY_FORMAT.format(new Date());
+        activeMeds.clear();
+        archivedMeds.clear();
         statsMap.clear();
         todayMap.clear();
 
+        if (all != null) {
+            for (Medication m : all) {
+                if (m.isArchivedState()) archivedMeds.add(m);
+                else activeMeds.add(m);
+                statsMap.put(m.getId(), buildStats(m));
+            }
+        }
+
+        String today = DatabaseHelper.DATE_KEY_FORMAT.format(new Date());
         int due = 0, taken = 0;
-        for (Medication m : meds) {
-            MedicationLog log = repository.getMedicationLog(m.getId(), today);
-            boolean isTaken = log != null && log.isTaken();
+        for (Medication m : activeMeds) {
+            boolean isTaken = false;
+            if (m.coversDate(today)) {
+                MedicationLog log = repository.getMedicationLog(m.getId(), today);
+                isTaken = log != null && log.isTaken();
+                due++;
+                if (isTaken) taken++;
+            }
             todayMap.put(m.getId(), isTaken);
-            statsMap.put(m.getId(), buildStats(m));
-            due++;
-            if (isTaken) taken++;
         }
 
         if (due == 0) {
-            tvSummary.setText("今日暂无服药安排");
+            tvSummary.setText("今日暂无进行中的服药安排");
         } else if (taken >= due) {
             tvSummary.setText("今日 " + due + " 种药已全部服用 ✓");
         } else {
             tvSummary.setText("今日：应服 " + due + " 种，已服 " + taken + " 种");
         }
 
+        // 组装列表
+        items.clear();
+        if (!activeMeds.isEmpty()) {
+            items.add("进行中（" + activeMeds.size() + "）");
+            items.addAll(activeMeds);
+        }
+        if (!archivedMeds.isEmpty()) {
+            items.add("已归档（" + archivedMeds.size() + "）");
+            if (showArchived) items.addAll(archivedMeds);
+        }
+
+        tvArchivedToggle.setVisibility(archivedMeds.isEmpty() ? View.GONE : View.VISIBLE);
+        tvArchivedToggle.setText(showArchived
+                ? "已归档（" + archivedMeds.size() + "）▾ 点击收起"
+                : "已归档（" + archivedMeds.size() + "）▸ 点击展开");
+
         adapter.notifyDataSetChanged();
-        boolean empty = meds.isEmpty();
+        boolean empty = activeMeds.isEmpty() && archivedMeds.isEmpty();
         tvEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
         listView.setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 
     /**
-     * 近 7 天依从性：统计区间为「建档日（或 6 天前）到昨天」，
-     * 今天还没过完，不计入漏服。
+     * 近 7 天依从性：统计区间为「起始日（或建档日，或 6 天前）到昨天」。
      */
     private String buildStats(Medication m) {
         Set<String> takenDates = new HashSet<>();
@@ -168,26 +215,33 @@ public class MedicationListActivity extends AppCompatActivity {
         Calendar start = (Calendar) today0.clone();
         start.add(Calendar.DAY_OF_YEAR, -6);
 
-        if (m.getCreatedAt() != null) {
-            Calendar created = Calendar.getInstance();
-            created.setTime(m.getCreatedAt());
-            created.set(Calendar.HOUR_OF_DAY, 0);
-            created.set(Calendar.MINUTE, 0);
-            created.set(Calendar.SECOND, 0);
-            created.set(Calendar.MILLISECOND, 0);
-            if (created.after(start)) start = created;
+        Calendar medStart = null;
+        if (m.getStartDate() != null) medStart = Medication.parseDate(m.getStartDate());
+        if (medStart == null && m.getCreatedAt() != null) {
+            medStart = Calendar.getInstance();
+            medStart.setTime(m.getCreatedAt());
+        }
+        if (medStart != null) {
+            medStart.set(Calendar.HOUR_OF_DAY, 0);
+            medStart.set(Calendar.MINUTE, 0);
+            medStart.set(Calendar.SECOND, 0);
+            medStart.set(Calendar.MILLISECOND, 0);
+            if (medStart.after(start)) start = medStart;
         }
 
         int dueDays = 0, takenDays = 0;
         Calendar cur = (Calendar) start.clone();
         while (cur.before(today0)) {
-            dueDays++;
-            if (takenDates.contains(DatabaseHelper.DATE_KEY_FORMAT.format(cur.getTime()))) takenDays++;
+            String key = DatabaseHelper.DATE_KEY_FORMAT.format(cur.getTime());
+            if (m.coversDate(key)) {
+                dueDays++;
+                if (takenDates.contains(key)) takenDays++;
+            }
             cur.add(Calendar.DAY_OF_YEAR, 1);
         }
 
         if (dueDays <= 0) {
-            return "刚建档，暂无历史记录";
+            return m.isArchivedState() ? "已归档" : "刚建档，暂无历史记录";
         }
         return "近 7 天：已服 " + takenDays + " 天 · 漏服 " + (dueDays - takenDays) + " 天";
     }
@@ -213,32 +267,53 @@ public class MedicationListActivity extends AppCompatActivity {
     }
 
     // ============================================================
-    // 列表适配器
+    // 列表适配器：表头 + 药品卡片
     // ============================================================
-    private class MedAdapter extends BaseAdapter {
+    private class MedListAdapter extends BaseAdapter {
+        private static final int TYPE_HEADER = 0;
+        private static final int TYPE_MED = 1;
         private final LayoutInflater inflater;
 
-        MedAdapter(Context context) {
+        MedListAdapter(Context context) {
             this.inflater = LayoutInflater.from(context);
         }
 
-        @Override public int getCount() { return meds.size(); }
-        @Override public Object getItem(int p) { return meds.get(p); }
+        @Override public int getCount() { return items.size(); }
+        @Override public Object getItem(int p) { return items.get(p); }
         @Override public long getItemId(int p) { return p; }
+
+        @Override public int getViewTypeCount() { return 2; }
+        @Override public int getItemViewType(int p) {
+            return items.get(p) instanceof String ? TYPE_HEADER : TYPE_MED;
+        }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            if (getItemViewType(position) == TYPE_HEADER) {
+                TextView tv = new TextView(MedicationListActivity.this);
+                tv.setText((String) items.get(position));
+                tv.setPadding(dp(12), dp(16), dp(12), dp(4));
+                tv.setTextSize(13f);
+                tv.setTextColor(Color.parseColor("#888888"));
+                tv.getPaint().setFakeBoldText(true);
+                return tv;
+            }
+
+            Medication m = (Medication) items.get(position);
             ViewHolder holder;
-            if (convertView == null) {
+            if (convertView == null || convertView.getTag() == null
+                    || !(convertView.getTag() instanceof ViewHolder)) {
                 convertView = inflater.inflate(R.layout.item_medication, parent, false);
                 holder = new ViewHolder();
                 holder.name = convertView.findViewById(R.id.tvMedName);
                 holder.dosage = convertView.findViewById(R.id.tvMedDosage);
                 holder.schedule = convertView.findViewById(R.id.tvMedSchedule);
+                holder.cycle = convertView.findViewById(R.id.tvMedCycle);
                 holder.detail = convertView.findViewById(R.id.tvMedDetail);
                 holder.expiry = convertView.findViewById(R.id.tvMedExpiry);
                 holder.notes = convertView.findViewById(R.id.tvMedNotes);
                 holder.stats = convertView.findViewById(R.id.tvMedStats);
+                holder.badge = convertView.findViewById(R.id.tvBadge);
                 holder.btnTake = convertView.findViewById(R.id.btnTake);
                 holder.btnEdit = convertView.findViewById(R.id.btnEdit);
                 convertView.setTag(holder);
@@ -246,19 +321,36 @@ public class MedicationListActivity extends AppCompatActivity {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            final Medication m = meds.get(position);
-            holder.name.setText(m.getName());
+            final Medication med = m;
+            holder.name.setText(med.getName());
 
-            if (m.getDosage() != null && !m.getDosage().trim().isEmpty()) {
+            if (med.getDosage() != null && !med.getDosage().trim().isEmpty()) {
                 holder.dosage.setVisibility(View.VISIBLE);
-                holder.dosage.setText(m.getDosage());
+                holder.dosage.setText(med.getDosage());
             } else {
                 holder.dosage.setVisibility(View.GONE);
             }
 
-            holder.schedule.setText(m.getScheduleText());
+            holder.schedule.setText(med.getScheduleText());
 
-            String detail = m.getSpecSummary();
+            // 周期 + 批号
+            StringBuilder cyc = new StringBuilder();
+            if ((med.getStartDate() != null && !med.getStartDate().trim().isEmpty())
+                    || (med.getEndDate() != null && !med.getEndDate().trim().isEmpty())) {
+                cyc.append("周期 ").append(med.getCycleText());
+            }
+            if (med.getBatchNo() != null && !med.getBatchNo().trim().isEmpty()) {
+                if (cyc.length() > 0) cyc.append(" · ");
+                cyc.append("批号 ").append(med.getBatchNo().trim());
+            }
+            if (cyc.length() > 0) {
+                holder.cycle.setVisibility(View.VISIBLE);
+                holder.cycle.setText(cyc.toString());
+            } else {
+                holder.cycle.setVisibility(View.GONE);
+            }
+
+            String detail = med.getSpecSummary();
             if (detail != null) {
                 holder.detail.setVisibility(View.VISIBLE);
                 holder.detail.setText(detail);
@@ -266,53 +358,84 @@ public class MedicationListActivity extends AppCompatActivity {
                 holder.detail.setVisibility(View.GONE);
             }
 
-            String expiry = m.getExpirySummary();
+            String expiry = med.getExpirySummary();
             if (expiry != null) {
                 holder.expiry.setVisibility(View.VISIBLE);
                 holder.expiry.setText(expiry);
-                int state = m.getExpiryState();
-                if (state == Medication.EXPIRY_EXPIRED) {
-                    holder.expiry.setTextColor(0xFFE53935);
-                } else if (state == Medication.EXPIRY_SOON) {
-                    holder.expiry.setTextColor(0xFFFB8C00);
-                } else {
-                    holder.expiry.setTextColor(0xFF999999);
-                }
+                int state = med.getExpiryState();
+                if (state == Medication.EXPIRY_EXPIRED) holder.expiry.setTextColor(0xFFE53935);
+                else if (state == Medication.EXPIRY_SOON) holder.expiry.setTextColor(0xFFFB8C00);
+                else holder.expiry.setTextColor(0xFF999999);
             } else {
                 holder.expiry.setVisibility(View.GONE);
             }
 
-            if (m.getNotes() != null && !m.getNotes().trim().isEmpty()) {
+            if (med.getNotes() != null && !med.getNotes().trim().isEmpty()) {
                 holder.notes.setVisibility(View.VISIBLE);
-                holder.notes.setText(m.getNotes());
+                holder.notes.setText(med.getNotes());
             } else {
                 holder.notes.setVisibility(View.GONE);
             }
 
-            String stats = statsMap.get(m.getId());
-            holder.stats.setText(stats != null ? stats : "");
-
-            boolean isTaken = Boolean.TRUE.equals(todayMap.get(m.getId()));
-            if (isTaken) {
-                holder.btnTake.setText("已服 ✓");
-                holder.btnTake.setTextColor(Color.WHITE);
-                holder.btnTake.setBackgroundTintList(
-                        android.content.res.ColorStateList.valueOf(0xFF43A047));
+            if (med.isArchivedState()) {
+                holder.stats.setText("已归档");
+                holder.stats.setTextColor(0xFF999999);
             } else {
-                holder.btnTake.setText("标记已服");
+                String stats = statsMap.get(med.getId());
+                holder.stats.setText(stats != null ? stats : "");
+                holder.stats.setTextColor(0xFF999999);
+            }
+
+            // 归档/未开始 状态
+            String today = DatabaseHelper.DATE_KEY_FORMAT.format(new Date());
+            boolean started = med.coversDate(today);
+            if (med.isArchivedState()) {
+                holder.badge.setVisibility(View.VISIBLE);
+                holder.badge.setText(med.isExpired() ? "已过期" : "已归档");
+                holder.btnTake.setText("已归档");
+                holder.btnTake.setEnabled(false);
                 holder.btnTake.setTextColor(Color.WHITE);
                 holder.btnTake.setBackgroundTintList(
                         android.content.res.ColorStateList.valueOf(0xFFBDBDBD));
+                holder.btnTake.setOnClickListener(null);
+            } else if (!started) {
+                holder.badge.setVisibility(View.VISIBLE);
+                holder.badge.setText("未开始");
+                holder.btnTake.setText("未开始");
+                holder.btnTake.setEnabled(false);
+                holder.btnTake.setTextColor(Color.WHITE);
+                holder.btnTake.setBackgroundTintList(
+                        android.content.res.ColorStateList.valueOf(0xFFBDBDBD));
+                holder.btnTake.setOnClickListener(null);
+            } else {
+                holder.badge.setVisibility(View.GONE);
+                boolean isTaken = Boolean.TRUE.equals(todayMap.get(med.getId()));
+                if (isTaken) {
+                    holder.btnTake.setText("已服 ✓");
+                    holder.btnTake.setTextColor(Color.WHITE);
+                    holder.btnTake.setBackgroundTintList(
+                            android.content.res.ColorStateList.valueOf(0xFF43A047));
+                } else {
+                    holder.btnTake.setText("标记已服");
+                    holder.btnTake.setTextColor(Color.WHITE);
+                    holder.btnTake.setBackgroundTintList(
+                            android.content.res.ColorStateList.valueOf(0xFFBDBDBD));
+                }
+                holder.btnTake.setEnabled(true);
+                holder.btnTake.setOnClickListener(v -> toggleToday(med));
             }
-            holder.btnTake.setOnClickListener(v -> toggleToday(m));
-            holder.btnEdit.setOnClickListener(v -> openEdit(m));
+            holder.btnEdit.setOnClickListener(v -> openEdit(med));
 
             return convertView;
         }
     }
 
+    private int dp(int v) {
+        return (int) (v * getResources().getDisplayMetrics().density);
+    }
+
     private static class ViewHolder {
-        TextView name, dosage, schedule, detail, expiry, notes, stats;
+        TextView name, dosage, schedule, cycle, detail, expiry, notes, stats, badge;
         Button btnTake, btnEdit;
     }
 }

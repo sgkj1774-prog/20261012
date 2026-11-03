@@ -35,6 +35,12 @@ public class Medication {
     private String packer;          // 包装厂
     private String companyAddress;  // 企业地址
 
+    // ── 服用周期（v15）：一个 medications 行 = 一个服药周期 / 一批药 ──
+    private String batchNo;         // 批号，用于追溯批次
+    private String startDate;       // 起始服用日期 yyyy-MM-dd，可空
+    private String endDate;         // 截止日期 yyyy-MM-dd，可空（空=长期）
+    private boolean archived = false; // 是否归档（手动标记）
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -88,6 +94,18 @@ public class Medication {
 
     public String getCompanyAddress() { return companyAddress; }
     public void setCompanyAddress(String companyAddress) { this.companyAddress = companyAddress; }
+
+    public String getBatchNo() { return batchNo; }
+    public void setBatchNo(String batchNo) { this.batchNo = batchNo; }
+
+    public String getStartDate() { return startDate; }
+    public void setStartDate(String startDate) { this.startDate = startDate; }
+
+    public String getEndDate() { return endDate; }
+    public void setEndDate(String endDate) { this.endDate = endDate; }
+
+    public boolean isArchived() { return archived; }
+    public void setArchived(boolean archived) { this.archived = archived; }
 
     /** 时段文字，用于导出与显示 */
     public static String timingText(int timing) {
@@ -196,5 +214,51 @@ public class Medication {
             sb.append(approvalNo.trim());
         }
         return sb.length() > 0 ? sb.toString() : null;
+    }
+
+    // ============================================================
+    // 服用周期（v15）
+    // ============================================================
+
+    /** 今天 yyyy-MM-dd */
+    public static String todayKey() {
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        return formatDate(c.get(java.util.Calendar.YEAR),
+                c.get(java.util.Calendar.MONTH),
+                c.get(java.util.Calendar.DAY_OF_MONTH));
+    }
+
+    /** 该周期是否覆盖给定日期（含起止日）。起止都为空则视为长期覆盖。 */
+    public boolean coversDate(String dayKey) {
+        if (dayKey == null) return false;
+        if (startDate != null && !startDate.trim().isEmpty() && startDate.trim().compareTo(dayKey) > 0) return false;
+        if (endDate != null && !endDate.trim().isEmpty() && endDate.trim().compareTo(dayKey) < 0) return false;
+        return true;
+    }
+
+    /** 是否已过截止日期（空截止视为未过期） */
+    public boolean isExpired() {
+        if (endDate == null || endDate.trim().isEmpty()) return false;
+        return endDate.trim().compareTo(todayKey()) < 0;
+    }
+
+    /** 归档态：手动归档 或 已过截止日期 */
+    public boolean isArchivedState() {
+        return archived || isExpired();
+    }
+
+    /** 今天是否处于「进行中」的每日打卡周期内 */
+    public boolean isActiveCycleToday() {
+        if (archived) return false;
+        return coversDate(todayKey());
+    }
+
+    /** 周期摘要：「2026-01-01 ~ 2026-04-01」；无起始以「起」、无截止以「进行中」 */
+    public String getCycleText() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(startDate != null && !startDate.trim().isEmpty() ? startDate.trim() : "起");
+        sb.append(" ~ ");
+        sb.append(endDate != null && !endDate.trim().isEmpty() ? endDate.trim() : "进行中");
+        return sb.toString();
     }
 }

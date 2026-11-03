@@ -245,11 +245,12 @@ public class DayDetailActivity extends AppCompatActivity {
         if (all == null || all.isEmpty()) return false;
 
         List<Medication> show = new ArrayList<>();
+        String todayKey = DAY_KEY_FMT.format(new Date());
         for (Medication m : all) {
-            if (m.getCreatedAt() != null) {
-                String createdKey = DAY_KEY_FMT.format(m.getCreatedAt());
-                if (createdKey.compareTo(dayKey) > 0) continue;
-            }
+            // 只显示该日期处于服用周期内的药（按起始/截止日期判断；未设日期的旧记录仍显示）
+            if (!m.coversDate(dayKey)) continue;
+            // 手动归档的周期：历史日期仍展示（便于追溯），但当天不再纳入打卡
+            if (m.isArchived() && dayKey.equals(todayKey)) continue;
             show.add(m);
         }
         if (show.isEmpty()) return false;
@@ -311,6 +312,9 @@ public class DayDetailActivity extends AppCompatActivity {
         StringBuilder sub = new StringBuilder(m.getScheduleText());
         if (m.getDosage() != null && !m.getDosage().trim().isEmpty()) {
             sub.append("  ").append(m.getDosage().trim());
+        }
+        if (m.getBatchNo() != null && !m.getBatchNo().trim().isEmpty()) {
+            sub.append("  ·  批号 ").append(m.getBatchNo().trim());
         }
         if (log != null && log.getNotes() != null && !log.getNotes().trim().isEmpty()) {
             sub.append("  ·  ").append(log.getNotes().trim());

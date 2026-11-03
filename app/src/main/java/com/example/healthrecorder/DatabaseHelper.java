@@ -13,7 +13,7 @@ import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "health_recorder.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 15;
 
     static final String TABLE_RECORDS = "records";
     static final String TABLE_USERS = "users";
@@ -388,6 +388,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             for (String col : cols) {
                 try { db.execSQL("ALTER TABLE " + TABLE_MEDICATIONS + " ADD COLUMN " + col + " TEXT"); } catch (Exception ignored) {}
             }
+        }
+        if (oldVersion < 15) {
+            // 服用周期（v15）：批号 + 起始/截止日期 + 归档标记
+            try { db.execSQL("ALTER TABLE " + TABLE_MEDICATIONS + " ADD COLUMN batch_no TEXT"); } catch (Exception ignored) {}
+            try { db.execSQL("ALTER TABLE " + TABLE_MEDICATIONS + " ADD COLUMN start_date TEXT"); } catch (Exception ignored) {}
+            try { db.execSQL("ALTER TABLE " + TABLE_MEDICATIONS + " ADD COLUMN end_date TEXT"); } catch (Exception ignored) {}
+            try { db.execSQL("ALTER TABLE " + TABLE_MEDICATIONS + " ADD COLUMN archived INTEGER DEFAULT 0"); } catch (Exception ignored) {}
         }
     }
 
@@ -1566,6 +1573,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         m.setManufacturer(optText(c, "manufacturer"));
         m.setPacker(optText(c, "packer"));
         m.setCompanyAddress(optText(c, "company_address"));
+        // v15 周期字段
+        m.setBatchNo(optText(c, "batch_no"));
+        m.setStartDate(optText(c, "start_date"));
+        m.setEndDate(optText(c, "end_date"));
+        m.setArchived(optInt(c, "archived") == 1);
         return m;
     }
 
@@ -1574,6 +1586,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int idx = c.getColumnIndex(column);
         if (idx < 0 || c.isNull(idx)) return null;
         return c.getString(idx);
+    }
+
+    /** 读整数列，列不存在或 NULL 时返回 0 */
+    private static int optInt(Cursor c, String column) {
+        int idx = c.getColumnIndex(column);
+        if (idx < 0 || c.isNull(idx)) return 0;
+        return c.getInt(idx);
     }
 
     /** 药品包装信息写入 ContentValues（新增/编辑共用） */
@@ -1586,6 +1605,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         v.put("manufacturer", trimToNull(m.getManufacturer()));
         v.put("packer", trimToNull(m.getPacker()));
         v.put("company_address", trimToNull(m.getCompanyAddress()));
+        // v15 周期字段
+        v.put("batch_no", trimToNull(m.getBatchNo()));
+        v.put("start_date", trimToNull(m.getStartDate()));
+        v.put("end_date", trimToNull(m.getEndDate()));
+        v.put("archived", m.isArchived() ? 1 : 0);
     }
 
     private static String trimToNull(String s) {
@@ -1623,6 +1647,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         v.put("user_id", m.getUserId());
         putMedicationExtra(v, m);
         db.update(TABLE_MEDICATIONS, v, "id=?", new String[]{String.valueOf(m.getId())});
+        db.close();
+    }
+
+    /** 仅切换归档标记（v15） */
+    public void setMedicationArchived(int id, boolean archived) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put("archived", archived ? 1 : 0);
+        db.update(TABLE_MEDICATIONS, v, "id=?", new String[]{String.valueOf(id)});
         db.close();
     }
 

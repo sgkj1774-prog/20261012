@@ -40,6 +40,18 @@
                 android:textSize="11sp"
                 android:textColor="#2196F3"
                 android:background="#E3F2FD"/>
+
+            <TextView
+                android:id="@+id/tvBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="1dp"
+                android:textSize="11sp"
+                android:textColor="#FFFFFF"
+                android:background="#9E9E9E"
+                android:visibility="gone"/>
         </LinearLayout>
 
         <TextView
@@ -49,6 +61,15 @@
             android:layout_marginTop="4dp"
             android:textSize="13sp"
             android:textColor="#666666"/>
+
+        <TextView
+            android:id="@+id/tvMedCycle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="12sp"
+            android:textColor="#607D8B"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/tvMedDetail"

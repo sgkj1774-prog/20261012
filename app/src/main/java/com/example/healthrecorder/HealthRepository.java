@@ -608,6 +608,11 @@ public class HealthRepository {
         mDbHelper.deleteMedication(id);
     }
 
+    /** 仅切换归档标记（v15 服用周期） */
+    public void setMedicationArchived(int id, boolean archived) {
+        mDbHelper.setMedicationArchived(id, archived);
+    }
+
     public int getMedicationCount() {
         return mDbHelper.getMedicationCount();
     }

@@ -49,7 +49,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="V1.4.14"
+                android:text="V1.4.15"
                 android:textSize="16sp"
                 android:textColor="#212121"
                 android:textStyle="bold"/>
@@ -63,7 +63,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• 药品档案改为清晰卡片式展示（圆角描边卡片）\n• 每张卡片新增「✎ 编辑」按钮，点一下即可修改药品信息与包装资料；长按卡片仍可删除\n• 服药列表顶部操作提示更新"
+                android:text="• 新增「服用周期」机制：每个药品是一条服药周期 / 一批药，可设起始服用日期与截止日期\n• 截止日期过后自动归档；也可长按卡片手动归档 / 恢复\n• 列表区分「进行中」与「已归档」（可展开），归档的药不再出现在每日打卡\n• 新增批号字段，配合包装信息便于按批次追溯历史服药\n• 主页日历点某日可看到当日所服批次；导出导入同步新增 4 列，旧备份兼容\n• 数据库升级到 v15"
                 android:textSize="14sp"
                 android:textColor="#666666"
                 android:lineSpacingExtra="4dp"

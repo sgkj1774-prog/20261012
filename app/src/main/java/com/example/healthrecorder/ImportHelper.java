@@ -565,9 +565,10 @@ public class ImportHelper {
         }
     }
 
-    // ── 服药档案 / 打卡（v13；v14 追加包装信息列）────────────────────
+    // ── 服药档案 / 打卡（v13；v14 包装信息；v15 周期字段）────────────
     // 列：药品名,成员,剂量,服用时段,服用时间,备注,创建日期,
-    //     生产日期,有效期至,规格,批准文号,上市许可持有人,生产厂,包装厂,企业地址
+    //     生产日期,有效期至,规格,批准文号,上市许可持有人,生产厂,包装厂,企业地址,
+    //     批号,起始日期,截止日期,归档
     private static com.example.healthrecorder.medication.Medication parseMedicationLine(String rawLine) {
         List<String> f = splitCsvLine(rawLine);
         if (f.isEmpty()) return null;
@@ -592,6 +593,11 @@ public class ImportHelper {
             if (f.size() > 12) m.setManufacturer(emptyToNull(f.get(12).trim()));
             if (f.size() > 13) m.setPacker(emptyToNull(f.get(13).trim()));
             if (f.size() > 14) m.setCompanyAddress(emptyToNull(f.get(14).trim()));
+            // v15 周期字段：旧 15 列备份无这些列，越界即跳过
+            if (f.size() > 15) m.setBatchNo(emptyToNull(f.get(15).trim()));
+            if (f.size() > 16) m.setStartDate(emptyToNull(normalizeDayKey(f.get(16))));
+            if (f.size() > 17) m.setEndDate(emptyToNull(normalizeDayKey(f.get(17))));
+            if (f.size() > 18) m.setArchived("是".equals(f.get(18).trim()) || "1".equals(f.get(18).trim()));
             m.setActive(true);
             return m;
         } catch (Exception e) {
@@ -1143,7 +1149,7 @@ public class ImportHelper {
     // 读后感明细 Sheet 列：0=书名,1=成员,2=起始页,3=结束页,4=内容,5=创建时间
     // 服药档案 Sheet 列：0=药品名,1=成员,2=剂量,3=服用时段,4=服用时间,5=备注,6=创建日期,
     //                    7=生产日期,8=有效期至,9=规格,10=批准文号,11=上市许可持有人,
-    //                    12=生产厂,13=包装厂,14=企业地址
+    //                    12=生产厂,13=包装厂,14=企业地址,15=批号,16=起始日期,17=截止日期,18=归档
     private static com.example.healthrecorder.medication.Medication parseMedicationRow(Row row) {
         try {
             String name = cellToString(row.getCell(0)).trim();
@@ -1171,6 +1177,12 @@ public class ImportHelper {
             m.setManufacturer(emptyToNull(cellToString(row.getCell(12))));
             m.setPacker(emptyToNull(cellToString(row.getCell(13))));
             m.setCompanyAddress(emptyToNull(cellToString(row.getCell(14))));
+            // v15 周期字段（旧文件无这些列，cell 为 null 时自然跳过）
+            m.setBatchNo(emptyToNull(cellToString(row.getCell(15))));
+            m.setStartDate(emptyToNull(normalizeDayKey(cellToString(row.getCell(16)))));
+            m.setEndDate(emptyToNull(normalizeDayKey(cellToString(row.getCell(17)))));
+            String archived = cellToString(row.getCell(18)).trim();
+            m.setArchived("是".equals(archived) || "1".equals(archived));
             m.setActive(true);
             return m;
         } catch (Exception e) {

@@ -353,6 +353,105 @@
                 android:inputType="textMultiLine"
                 android:layout_marginBottom="20dp"/>
 
+            <!-- ================= 服用周期（选填） ================= -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="服用周期（选填，便于按批次追溯）"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#2196F3"
+                android:layout_marginBottom="10dp"/>
+
+            <!-- 起始服用日期 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="起始服用日期"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="14dp">
+                <TextView
+                    android:id="@+id/textStartDate"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="点击选择"
+                    android:background="@android:color/white"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="15sp"
+                    android:textColor="#999999"/>
+                <TextView
+                    android:id="@+id/btnClearStart"
+                    android:layout_width="48dp"
+                    android:layout_height="50dp"
+                    android:gravity="center"
+                    android:text="清除"
+                    android:textSize="12sp"
+                    android:textColor="#2196F3"/>
+            </LinearLayout>
+
+            <!-- 截止日期 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="截止日期（到期后自动归档）"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="14dp">
+                <TextView
+                    android:id="@+id/textEndDate"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="点击选择"
+                    android:background="@android:color/white"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="15sp"
+                    android:textColor="#999999"/>
+                <TextView
+                    android:id="@+id/btnClearEnd"
+                    android:layout_width="48dp"
+                    android:layout_height="50dp"
+                    android:gravity="center"
+                    android:text="清除"
+                    android:textSize="12sp"
+                    android:textColor="#2196F3"/>
+            </LinearLayout>
+
+            <!-- 批号 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="批号"
+                android:textSize="13sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="4dp"/>
+            <EditText
+                android:id="@+id/editBatchNo"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="如：批号 20260101"
+                android:background="@android:color/white"
+                android:paddingHorizontal="12dp"
+                android:textSize="15sp"
+                android:inputType="text"
+                android:layout_marginBottom="20dp"/>
+
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
