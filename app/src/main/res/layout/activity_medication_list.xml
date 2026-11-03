@@ -51,6 +51,17 @@
         android:textSize="13sp"
         android:textColor="#666666"/>
 
+    <!-- 操作提示 -->
+    <TextView
+        android:id="@+id/tvHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="10dp"
+        android:text="点击药品可修改信息，长按可删除 · 补录历史打卡请到主页日历点对应日期"
+        android:textSize="11sp"
+        android:textColor="#AAAAAA"/>
+
     <!-- 列表 -->
     <ListView
         android:id="@+id/listView"

@@ -49,6 +49,35 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="V1.4.13"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-11-03"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 主页日历点任意日期，可直接为该日补录或取消服药打卡（未来日期不可打卡）\n• 日详情页长按某种药可写当日备注（如漏服原因），备注随之导出\n• 药品档案支持编辑：点击卡片修改，长按弹出「编辑药品信息 / 删除药品」菜单\n• 服药列表顶部新增操作提示"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="V1.4.12"
                 android:textSize="16sp"
                 android:textColor="#212121"

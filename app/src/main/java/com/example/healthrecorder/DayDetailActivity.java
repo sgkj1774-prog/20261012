@@ -1,14 +1,20 @@
 package com.example.healthrecorder;
 
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.healthrecorder.book.BookRecord;
@@ -16,6 +22,8 @@ import com.example.healthrecorder.breathing.BreathingRecord;
 import com.example.healthrecorder.cat.CatRecord;
 import com.example.healthrecorder.event.Event;
 import com.example.healthrecorder.exercise.ExerciseRecord;
+import com.example.healthrecorder.medication.Medication;
+import com.example.healthrecorder.medication.MedicationLog;
 import com.example.healthrecorder.teeth.TeethRecord;
 
 import java.text.SimpleDateFormat;
@@ -34,6 +42,7 @@ public class DayDetailActivity extends AppCompatActivity {
 
     private LinearLayout contentContainer;
     private HealthRepository repository;
+    private Date currentDate = new Date();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +65,14 @@ public class DayDetailActivity extends AppCompatActivity {
     }
 
     private void loadDayData(Date date) {
+        currentDate = date;
+        contentContainer.removeAllViews();
+
         String dayKey = DAY_KEY_FMT.format(date);
         boolean hasAny = false;
+
+        // === 服药打卡（放在最前，点到某天就能直接补/取消打卡）===
+        if (addMedicationSection(dayKey)) hasAny = true;
 
         // === 健康体重记录 ===
         List<Record> allHealth = repository.getAllRecords();
@@ -211,6 +226,204 @@ public class DayDetailActivity extends AppCompatActivity {
         if (!hasAny) {
             addEmptyHint();
         }
+    }
+
+    // ============================================================
+    // 服药打卡（按日粒度，可在任意历史日期补录/取消）
+    // ============================================================
+
+    private int dp(int v) {
+        return (int) (v * getResources().getDisplayMetrics().density);
+    }
+
+    /**
+     * 渲染当日服药打卡区块。药品按「建档日不晚于该日」过滤，
+     * 避免翻到建档前的日期时冒出一堆没意义的药。
+     */
+    private boolean addMedicationSection(String dayKey) {
+        List<Medication> all = repository.getAllMedications();
+        if (all == null || all.isEmpty()) return false;
+
+        List<Medication> show = new ArrayList<>();
+        for (Medication m : all) {
+            if (m.getCreatedAt() != null) {
+                String createdKey = DAY_KEY_FMT.format(m.getCreatedAt());
+                if (createdKey.compareTo(dayKey) > 0) continue;
+            }
+            show.add(m);
+        }
+        if (show.isEmpty()) return false;
+
+        addSection("💊 服药记录", "#00ACC1");
+        boolean future = dayKey.compareTo(DAY_KEY_FMT.format(new Date())) > 0;
+        addHintLine(future
+                ? "这一天还没到，暂不能打卡"
+                : "点击整行切换「已服 / 未服」，长按可写备注");
+
+        for (Medication m : show) {
+            MedicationLog log = repository.getMedicationLog(m.getId(), dayKey);
+            addMedicationRow(m, log, future);
+        }
+        return true;
+    }
+
+    private void addHintLine(String text) {
+        TextView tv = new TextView(this);
+        tv.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        tv.setText(text);
+        tv.setTextSize(12f);
+        tv.setTextColor(Color.parseColor("#999999"));
+        tv.setPadding(0, 0, 0, dp(8));
+        contentContainer.addView(tv);
+    }
+
+    private void addMedicationRow(final Medication m, final MedicationLog log, final boolean future) {
+        final boolean taken = log != null && log.isTaken();
+
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(12), dp(10), dp(12), dp(10));
+        row.setBackgroundColor(Color.WHITE);
+        row.setElevation(dp(1));
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, dp(4), 0, dp(4));
+        row.setLayoutParams(lp);
+
+        LinearLayout left = new LinearLayout(this);
+        left.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams leftLp = new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        left.setLayoutParams(leftLp);
+
+        TextView name = new TextView(this);
+        name.setText(m.getName());
+        name.setTextSize(15f);
+        name.setTextColor(Color.parseColor("#333333"));
+        name.getPaint().setFakeBoldText(true);
+        left.addView(name);
+
+        StringBuilder sub = new StringBuilder(m.getScheduleText());
+        if (m.getDosage() != null && !m.getDosage().trim().isEmpty()) {
+            sub.append("  ").append(m.getDosage().trim());
+        }
+        if (log != null && log.getNotes() != null && !log.getNotes().trim().isEmpty()) {
+            sub.append("  ·  ").append(log.getNotes().trim());
+        }
+        TextView tvSub = new TextView(this);
+        tvSub.setText(sub.toString());
+        tvSub.setTextSize(12f);
+        tvSub.setTextColor(Color.parseColor("#999999"));
+        tvSub.setPadding(0, dp(2), 0, 0);
+        left.addView(tvSub);
+
+        row.addView(left);
+
+        TextView status = new TextView(this);
+        if (future) {
+            status.setText("未到");
+            status.setTextColor(Color.parseColor("#999999"));
+            GradientDrawable bg = new GradientDrawable();
+            bg.setCornerRadius(dp(12));
+            bg.setColor(Color.parseColor("#F0F0F0"));
+            status.setBackground(bg);
+        } else if (taken) {
+            status.setText("已服 ✓");
+            status.setTextColor(Color.WHITE);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setCornerRadius(dp(12));
+            bg.setColor(Color.parseColor("#43A047"));
+            status.setBackground(bg);
+        } else {
+            status.setText("未服");
+            status.setTextColor(Color.WHITE);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setCornerRadius(dp(12));
+            bg.setColor(Color.parseColor("#BDBDBD"));
+            status.setBackground(bg);
+        }
+        status.setTextSize(12f);
+        status.setPadding(dp(12), dp(5), dp(12), dp(5));
+        row.addView(status);
+
+        row.setOnClickListener(v -> toggleMedication(m, log, taken, future));
+        row.setOnLongClickListener(v -> {
+            showMedicationNoteDialog(m, log, future);
+            return true;
+        });
+
+        contentContainer.addView(row);
+    }
+
+    private void toggleMedication(Medication m, MedicationLog existing, boolean taken, boolean future) {
+        if (future) {
+            Toast.makeText(this, "还没到这一天，不能提前打卡", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String dayKey = DAY_KEY_FMT.format(currentDate);
+        MedicationLog log = new MedicationLog();
+        log.setMedId(m.getId());
+        log.setLogDate(dayKey);
+        log.setTaken(!taken);
+        log.setTakenAt(!taken ? new Date() : null);
+        log.setUserId(m.getUserId());
+        if (existing != null) log.setNotes(existing.getNotes());
+
+        repository.saveMedicationLog(log);
+        Toast.makeText(this,
+                !taken ? m.getName() + " 已标记为已服" : "已取消 " + m.getName() + " 的打卡",
+                Toast.LENGTH_SHORT).show();
+        loadDayData(currentDate);
+    }
+
+    private void showMedicationNoteDialog(final Medication m, final MedicationLog log, final boolean future) {
+        if (future) {
+            Toast.makeText(this, "这一天还没到，暂不能记录", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        input.setMinLines(2);
+        input.setPadding(dp(16), dp(8), dp(16), dp(8));
+        input.setHint("如：漏服，忘带药 / 改到饭后服");
+        if (log != null && log.getNotes() != null) input.setText(log.getNotes());
+        input.setSelection(input.getText().length());
+
+        new AlertDialog.Builder(this)
+                .setTitle(m.getName() + " · 当日备注")
+                .setView(input)
+                .setPositiveButton("保存", (d, w) -> {
+                    String note = input.getText().toString().trim();
+                    MedicationLog l = new MedicationLog();
+                    l.setMedId(m.getId());
+                    l.setLogDate(DAY_KEY_FMT.format(currentDate));
+                    l.setTaken(log != null && log.isTaken());
+                    l.setTakenAt(log != null ? log.getTakenAt() : null);
+                    l.setUserId(m.getUserId());
+                    l.setNotes(note.isEmpty() ? null : note);
+                    repository.saveMedicationLog(l);
+                    loadDayData(currentDate);
+                })
+                .setNeutralButton("清空备注", (d, w) -> {
+                    // 只清备注，打卡状态保持原样；本来就没记录则不写库
+                    if (log == null) return;
+                    MedicationLog l = new MedicationLog();
+                    l.setMedId(m.getId());
+                    l.setLogDate(DAY_KEY_FMT.format(currentDate));
+                    l.setTaken(log.isTaken());
+                    l.setTakenAt(log.getTakenAt());
+                    l.setUserId(m.getUserId());
+                    l.setNotes(null);
+                    repository.saveMedicationLog(l);
+                    loadDayData(currentDate);
+                })
+                .setNegativeButton("取消", null)
+                .show();
     }
 
     private void addSection(String title, String colorHex) {

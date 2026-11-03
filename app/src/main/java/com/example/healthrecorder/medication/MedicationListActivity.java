@@ -73,7 +73,7 @@ public class MedicationListActivity extends AppCompatActivity {
 
         listView.setOnItemClickListener((parent, view, position, id) -> openEdit(meds.get(position)));
         listView.setOnItemLongClickListener((parent, view, position, id) -> {
-            confirmDelete(meds.get(position));
+            showActions(meds.get(position));
             return true;
         });
 
@@ -90,6 +90,17 @@ public class MedicationListActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MedicationAddActivity.class);
         intent.putExtra("edit_id", m.getId());
         addLauncher.launch(intent);
+    }
+
+    /** 长按弹操作菜单：编辑 / 删除 */
+    private void showActions(final Medication m) {
+        new AlertDialog.Builder(this)
+                .setTitle(m.getName())
+                .setItems(new String[]{"编辑药品信息", "删除药品"}, (d, which) -> {
+                    if (which == 0) openEdit(m);
+                    else confirmDelete(m);
+                })
+                .show();
     }
 
     private void confirmDelete(Medication m) {
