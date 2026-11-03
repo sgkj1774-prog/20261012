@@ -5,18 +5,25 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "health_recorder.db";
-    private static final int DATABASE_VERSION = 12;
+    private static final int DATABASE_VERSION = 13;
 
     static final String TABLE_RECORDS = "records";
     static final String TABLE_USERS = "users";
     static final String TABLE_CAT_FOOD = "cat_food_records";
     static final String TABLE_BOOK_NOTES = "book_notes";
+    static final String TABLE_MEDICATIONS = "medications";
+    static final String TABLE_MED_LOGS = "medication_logs";
+
+    /** 打卡用的日期键，全局统一 yyyy-MM-dd */
+    public static final SimpleDateFormat DATE_KEY_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
     public static final String COLUMN_ID = "id";
     static final String COLUMN_WEIGHT = "weight";
@@ -166,6 +173,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + "notes TEXT,"
                 + "user_id INTEGER DEFAULT 1"
                 + ")");
+
+        // 服药档案（v13）：一种药一条
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MEDICATIONS + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "name TEXT NOT NULL,"
+                + "dosage TEXT,"
+                + "timing INTEGER DEFAULT 0,"
+                + "time_text TEXT,"
+                + "notes TEXT,"
+                + "active INTEGER DEFAULT 1,"
+                + "created_at INTEGER,"
+                + "user_id INTEGER DEFAULT 1"
+                + ")");
+
+        // 服药打卡（v13）：一种药每天最多一条
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MED_LOGS + " ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "med_id INTEGER NOT NULL,"
+                + "log_date TEXT NOT NULL,"
+                + "taken INTEGER DEFAULT 0,"
+                + "taken_at INTEGER,"
+                + "notes TEXT,"
+                + "user_id INTEGER DEFAULT 1"
+                + ")");
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS idx_med_log_unique ON "
+                + TABLE_MED_LOGS + "(med_id, log_date)");
     }
 
     @Override
@@ -312,6 +345,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + "user_id INTEGER DEFAULT 1"
                     + ")");
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_book_notes_book ON " + TABLE_BOOK_NOTES + "(book_id)");
+        }
+        if (oldVersion < 13) {
+            // 服药档案 + 每日打卡
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MEDICATIONS + " ("
+                    + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + "name TEXT NOT NULL,"
+                    + "dosage TEXT,"
+                    + "timing INTEGER DEFAULT 0,"
+                    + "time_text TEXT,"
+                    + "notes TEXT,"
+                    + "active INTEGER DEFAULT 1,"
+                    + "created_at INTEGER,"
+                    + "user_id INTEGER DEFAULT 1"
+                    + ")");
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MED_LOGS + " ("
+                    + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + "med_id INTEGER NOT NULL,"
+                    + "log_date TEXT NOT NULL,"
+                    + "taken INTEGER DEFAULT 0,"
+                    + "taken_at INTEGER,"
+                    + "notes TEXT,"
+                    + "user_id INTEGER DEFAULT 1"
+                    + ")");
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS idx_med_log_unique ON "
+                    + TABLE_MED_LOGS + "(med_id, log_date)");
         }
     }
 
@@ -1433,6 +1491,190 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // ============================================================
     // Data Reset
     // ============================================================
+    // ============================================================
+    // 服药档案 / 打卡（v13）
+    // ============================================================
+
+    public List<com.example.healthrecorder.medication.Medication> getAllMedications() {
+        List<com.example.healthrecorder.medication.Medication> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT m.*, u." + COLUMN_USER_NAME + " AS un "
+                        + "FROM " + TABLE_MEDICATIONS + " m LEFT JOIN " + TABLE_USERS
+                        + " u ON m.user_id=u." + COLUMN_ID
+                        + " ORDER BY m.active DESC, m.timing ASC, m.id ASC", null);
+        if (c.moveToFirst()) {
+            do {
+                list.add(readMedication(c));
+            } while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return list;
+    }
+
+    public com.example.healthrecorder.medication.Medication getMedicationById(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_MEDICATIONS + " WHERE id=?",
+                new String[]{String.valueOf(id)});
+        com.example.healthrecorder.medication.Medication m = null;
+        if (c.moveToFirst()) m = readMedication(c);
+        c.close();
+        db.close();
+        return m;
+    }
+
+    private com.example.healthrecorder.medication.Medication readMedication(Cursor c) {
+        com.example.healthrecorder.medication.Medication m =
+                new com.example.healthrecorder.medication.Medication();
+        m.setId(c.getInt(c.getColumnIndexOrThrow("id")));
+        m.setName(c.getString(c.getColumnIndexOrThrow("name")));
+        m.setDosage(c.getString(c.getColumnIndexOrThrow("dosage")));
+        m.setTiming(c.getInt(c.getColumnIndexOrThrow("timing")));
+        m.setTimeText(c.getString(c.getColumnIndexOrThrow("time_text")));
+        m.setNotes(c.getString(c.getColumnIndexOrThrow("notes")));
+        m.setActive(c.getInt(c.getColumnIndexOrThrow("active")) == 1);
+        int caIdx = c.getColumnIndex("created_at");
+        if (caIdx >= 0 && !c.isNull(caIdx)) m.setCreatedAt(new Date(c.getLong(caIdx)));
+        m.setUserId(c.getInt(c.getColumnIndexOrThrow("user_id")));
+        int unIdx = c.getColumnIndex("un");
+        if (unIdx >= 0) m.setUserName(c.getString(unIdx));
+        return m;
+    }
+
+    public long addMedication(com.example.healthrecorder.medication.Medication m) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put("name", m.getName());
+        v.put("dosage", m.getDosage());
+        v.put("timing", m.getTiming());
+        v.put("time_text", m.getTimeText());
+        v.put("notes", m.getNotes());
+        v.put("active", m.isActive() ? 1 : 0);
+        v.put("created_at", m.getCreatedAt() != null ? m.getCreatedAt().getTime() : System.currentTimeMillis());
+        v.put("user_id", m.getUserId());
+        long id = db.insert(TABLE_MEDICATIONS, null, v);
+        db.close();
+        return id;
+    }
+
+    public void updateMedication(com.example.healthrecorder.medication.Medication m) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put("name", m.getName());
+        v.put("dosage", m.getDosage());
+        v.put("timing", m.getTiming());
+        v.put("time_text", m.getTimeText());
+        v.put("notes", m.getNotes());
+        v.put("active", m.isActive() ? 1 : 0);
+        v.put("user_id", m.getUserId());
+        db.update(TABLE_MEDICATIONS, v, "id=?", new String[]{String.valueOf(m.getId())});
+        db.close();
+    }
+
+    /** 删除药品，连带删除它的全部打卡记录 */
+    public void deleteMedication(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MED_LOGS, "med_id=?", new String[]{String.valueOf(id)});
+        db.delete(TABLE_MEDICATIONS, "id=?", new String[]{String.valueOf(id)});
+        db.close();
+    }
+
+    public int getMedicationCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_MEDICATIONS, null);
+        int count = cursor.moveToFirst() ? cursor.getInt(0) : 0;
+        cursor.close();
+        db.close();
+        return count;
+    }
+
+    public List<com.example.healthrecorder.medication.MedicationLog> getAllMedicationLogs() {
+        List<com.example.healthrecorder.medication.MedicationLog> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT l.*, m.name AS mn FROM " + TABLE_MED_LOGS + " l "
+                        + "LEFT JOIN " + TABLE_MEDICATIONS + " m ON l.med_id=m.id "
+                        + "ORDER BY l.log_date ASC, l.id ASC", null);
+        if (c.moveToFirst()) {
+            do {
+                list.add(readMedLog(c));
+            } while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return list;
+    }
+
+    /** 某药指定天数内的打卡（按日期倒序） */
+    public List<com.example.healthrecorder.medication.MedicationLog> getMedicationLogsForMed(int medId, int days) {
+        List<com.example.healthrecorder.medication.MedicationLog> list = new ArrayList<>();
+        String from = DATE_KEY_FORMAT.format(new Date(System.currentTimeMillis() - (long) days * 24 * 3600 * 1000));
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_MED_LOGS
+                        + " WHERE med_id=? AND log_date>=? ORDER BY log_date DESC",
+                new String[]{String.valueOf(medId), from});
+        if (c.moveToFirst()) {
+            do {
+                list.add(readMedLog(c));
+            } while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return list;
+    }
+
+    private com.example.healthrecorder.medication.MedicationLog readMedLog(Cursor c) {
+        com.example.healthrecorder.medication.MedicationLog l =
+                new com.example.healthrecorder.medication.MedicationLog();
+        l.setId(c.getInt(c.getColumnIndexOrThrow("id")));
+        l.setMedId(c.getInt(c.getColumnIndexOrThrow("med_id")));
+        l.setLogDate(c.getString(c.getColumnIndexOrThrow("log_date")));
+        l.setTaken(c.getInt(c.getColumnIndexOrThrow("taken")) == 1);
+        int taIdx = c.getColumnIndex("taken_at");
+        if (taIdx >= 0 && !c.isNull(taIdx)) l.setTakenAt(new Date(c.getLong(taIdx)));
+        l.setNotes(c.getString(c.getColumnIndexOrThrow("notes")));
+        int uidIdx = c.getColumnIndex("user_id");
+        if (uidIdx >= 0) l.setUserId(c.getInt(uidIdx));
+        int mnIdx = c.getColumnIndex("mn");
+        if (mnIdx >= 0) l.setMedName(c.getString(mnIdx));
+        return l;
+    }
+
+    public com.example.healthrecorder.medication.MedicationLog getMedicationLog(int medId, String logDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_MED_LOGS + " WHERE med_id=? AND log_date=?",
+                new String[]{String.valueOf(medId), logDate});
+        com.example.healthrecorder.medication.MedicationLog l = null;
+        if (c.moveToFirst()) l = readMedLog(c);
+        c.close();
+        db.close();
+        return l;
+    }
+
+    /**
+     * 写入当天打卡（同一天重复写会覆盖，靠 med_id + log_date 唯一索引）。
+     */
+    public void saveMedicationLog(com.example.healthrecorder.medication.MedicationLog l) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put("med_id", l.getMedId());
+        v.put("log_date", l.getLogDate());
+        v.put("taken", l.isTaken() ? 1 : 0);
+        v.put("taken_at", l.getTakenAt() != null ? l.getTakenAt().getTime() : null);
+        v.put("notes", l.getNotes());
+        v.put("user_id", l.getUserId());
+        db.insertWithOnConflict(TABLE_MED_LOGS, null, v, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
+    }
+
+    public void deleteMedicationLog(int medId, String logDate) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MED_LOGS, "med_id=? AND log_date=?",
+                new String[]{String.valueOf(medId), logDate});
+        db.close();
+    }
+
     public void resetAllData() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete("records", null, null);
@@ -1445,6 +1687,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete("book_reading_records", null, null);
         db.delete(TABLE_BOOK_NOTES, null, null);
         db.delete("cat_food_records", null, null);
+        db.delete(TABLE_MED_LOGS, null, null);
+        db.delete(TABLE_MEDICATIONS, null, null);
         db.execSQL("INSERT INTO " + TABLE_USERS + "(" + COLUMN_USER_NAME + "," + COLUMN_USER_COLOR + ") VALUES ('本人', 0)");
         db.close();
     }

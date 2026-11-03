@@ -55,6 +55,8 @@ public class ImportHelper {
         public final List<Event> events;
         public final List<BookRecord> bookRecords;
         public final List<CatFoodRecord> catFoodRecords;
+        public final List<com.example.healthrecorder.medication.Medication> medications;
+        public final List<com.example.healthrecorder.medication.MedicationLog> medicationLogs;
         public final int totalLines;
         public final int skippedLines;
         public final String errorMessage;
@@ -62,6 +64,8 @@ public class ImportHelper {
         public ImportResult(List<Record> records, List<User> users,
                             List<CatRecord> catRecords, List<TeethRecord> teethRecords, List<ExerciseRecord> exerciseRecords,
                             List<BreathingRecord> breathingRecords, List<Event> events, List<BookRecord> bookRecords, List<CatFoodRecord> catFoodRecords,
+                            List<com.example.healthrecorder.medication.Medication> medications,
+                            List<com.example.healthrecorder.medication.MedicationLog> medicationLogs,
                             int totalLines, int skippedLines, String errorMessage) {
             this.records = records;
             this.users = users;
@@ -72,6 +76,8 @@ public class ImportHelper {
             this.events = events;
             this.bookRecords = bookRecords;
             this.catFoodRecords = catFoodRecords;
+            this.medications = medications;
+            this.medicationLogs = medicationLogs;
             this.totalLines = totalLines;
             this.skippedLines = skippedLines;
             this.errorMessage = errorMessage;
@@ -100,6 +106,8 @@ public class ImportHelper {
         List<Event> events = new ArrayList<>();
         List<BookRecord> bookRecords = new ArrayList<>();
         List<CatFoodRecord> catFoodRecords = new ArrayList<>();
+        List<com.example.healthrecorder.medication.Medication> medications = new ArrayList<>();
+        List<com.example.healthrecorder.medication.MedicationLog> medicationLogs = new ArrayList<>();
         List<NoteRow> noteRows = new ArrayList<>();
         int totalLines = 0;
         int skippedLines = 0;
@@ -144,13 +152,16 @@ public class ImportHelper {
                 else if (trimmed.contains("读书笔记记录")) { currentSection = "book"; headerSeen = false; }
                 else if (trimmed.contains("读后感明细")) { currentSection = "bookNote"; headerSeen = false; }
                 else if (trimmed.contains("猫粮记录")) { currentSection = "catFood"; headerSeen = false; }
+                else if (trimmed.contains("服药打卡")) { currentSection = "medLog"; headerSeen = false; }
+                else if (trimmed.contains("服药档案")) { currentSection = "medication"; headerSeen = false; }
                 continue;
             }
 
             // 跳过表头
             if (!headerSeen) {
                 headerSeen = true;
-                if (trimmed.startsWith("ID") || trimmed.startsWith("日期") || trimmed.startsWith("书名")) { continue; }
+                if (trimmed.startsWith("ID") || trimmed.startsWith("日期")
+                        || trimmed.startsWith("书名") || trimmed.startsWith("药品名")) { continue; }
             }
 
             // 解析行
@@ -196,6 +207,14 @@ public class ImportHelper {
                         NoteRow nr = parseNoteLine(line);
                         if (nr != null) noteRows.add(nr); else skippedLines++;
                         break;
+                    case "medication":
+                        com.example.healthrecorder.medication.Medication md = parseMedicationLine(line);
+                        if (md != null) medications.add(md); else skippedLines++;
+                        break;
+                    case "medLog":
+                        com.example.healthrecorder.medication.MedicationLog ml = parseMedLogLine(line);
+                        if (ml != null) medicationLogs.add(ml); else skippedLines++;
+                        break;
                 }
             } catch (Exception e) {
                 skippedLines++;
@@ -205,6 +224,7 @@ public class ImportHelper {
         attachNoteRows(bookRecords, noteRows);
         return new ImportResult(records, users, catRecords, teethRecords, exerciseRecords,
                 breathingRecords, events, bookRecords, catFoodRecords,
+                medications, medicationLogs,
                 totalLines, skippedLines, null);
     }
 
@@ -545,8 +565,61 @@ public class ImportHelper {
         }
     }
 
-    /** 按「书名 + 成员」把明细挂到对应 BookRecord，等插入拿到真实 id 后再落库 */
-    private static void attachNoteRows(List<BookRecord> books, List<NoteRow> rows) {
+    // ── 服药档案 / 打卡（v13）────────────────────────────────────
+    // 列：药品名,成员,剂量,服用时段,服用时间,备注,创建日期
+    private static com.example.healthrecorder.medication.Medication parseMedicationLine(String rawLine) {
+        List<String> f = splitCsvLine(rawLine);
+        if (f.isEmpty()) return null;
+        try {
+            String name = f.get(0).trim();
+            if (name.isEmpty()) return null;
+            com.example.healthrecorder.medication.Medication m =
+                    new com.example.healthrecorder.medication.Medication();
+            m.setName(name);
+            if (f.size() > 1) m.setUserName(f.get(1).trim());
+            if (f.size() > 2) m.setDosage(f.get(2).trim().isEmpty() ? null : f.get(2).trim());
+            if (f.size() > 3) m.setTiming(com.example.healthrecorder.medication.Medication.parseTiming(f.get(3).trim()));
+            if (f.size() > 4) m.setTimeText(f.get(4).trim().isEmpty() ? null : f.get(4).trim());
+            if (f.size() > 5) m.setNotes(f.get(5).trim().isEmpty() ? null : f.get(5).trim());
+            if (f.size() > 6) m.setCreatedAt(parseDate(f.get(6).trim()));
+            m.setActive(true);
+            return m;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 列：药品名,成员,日期,是否已服,实际服用时间,备注
+    private static com.example.healthrecorder.medication.MedicationLog parseMedLogLine(String rawLine) {
+        List<String> f = splitCsvLine(rawLine);
+        if (f.size() < 4) return null;
+        try {
+            String name = f.get(0).trim();
+            String date = normalizeDayKey(f.get(2).trim());
+            if (name.isEmpty() || date.isEmpty()) return null;
+            com.example.healthrecorder.medication.MedicationLog l =
+                    new com.example.healthrecorder.medication.MedicationLog();
+            l.setMedName(name);
+            l.setLogDate(date);
+            String taken = f.get(3).trim();
+            l.setTaken(taken.equals("是") || taken.equals("1") || taken.equalsIgnoreCase("true"));
+            if (f.size() > 4) l.setTakenAt(parseDate(f.get(4).trim()));
+            if (f.size() > 5) l.setNotes(f.get(5).trim().isEmpty() ? null : f.get(5).trim());
+            return l;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** 统一成 yyyy-MM-dd（兼容 2026/10/27、2026-10-27 10:30 等写法） */
+    private static String normalizeDayKey(String s) {
+        if (s == null) return "";
+        String d = s.trim().replace('/', '-');
+        if (d.length() > 10) d = d.substring(0, 10);
+        return d;
+    }
+
+    /** 按「书名 + 成员」把明细挂到对应 BookRecord，等插入拿到真实 id 后再落库 */    private static void attachNoteRows(List<BookRecord> books, List<NoteRow> rows) {
         if (books == null || rows == null || rows.isEmpty()) return;
         for (NoteRow nr : rows) {
             BookRecord target = null;
@@ -602,6 +675,8 @@ public class ImportHelper {
         List<Event> events = new ArrayList<>();
         List<BookRecord> bookRecords = new ArrayList<>();
         List<CatFoodRecord> catFoodRecords = new ArrayList<>();
+        List<com.example.healthrecorder.medication.Medication> medications = new ArrayList<>();
+        List<com.example.healthrecorder.medication.MedicationLog> medicationLogs = new ArrayList<>();
         int totalRows = 0;
         int skippedRows = 0;
 
@@ -755,9 +830,42 @@ public class ImportHelper {
         }
         attachNoteRows(bookRecords, noteRows);
 
+        // 服药档案（v13）
+        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            if (sheet != null && sheet.getSheetName() != null && sheet.getSheetName().contains("服药档案")) {
+                boolean first = true;
+                for (Row row : sheet) {
+                    if (row == null) continue;
+                    totalRows++;
+                    if (first) { first = false; continue; }
+                    com.example.healthrecorder.medication.Medication md = parseMedicationRow(row);
+                    if (md != null) medications.add(md); else skippedRows++;
+                }
+                break;
+            }
+        }
+
+        // 服药打卡（v13）
+        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+            Sheet sheet = workbook.getSheetAt(i);
+            if (sheet != null && sheet.getSheetName() != null && sheet.getSheetName().contains("服药打卡")) {
+                boolean first = true;
+                for (Row row : sheet) {
+                    if (row == null) continue;
+                    totalRows++;
+                    if (first) { first = false; continue; }
+                    com.example.healthrecorder.medication.MedicationLog ml = parseMedLogRow(row);
+                    if (ml != null) medicationLogs.add(ml); else skippedRows++;
+                }
+                break;
+            }
+        }
+
         workbook.close();
         return new ImportResult(records, users, catRecords, teethRecords, exerciseRecords,
                 breathingRecords, events, bookRecords, catFoodRecords,
+                medications, medicationLogs,
                 totalRows, skippedRows, null);
     }
 
@@ -1017,8 +1125,55 @@ public class ImportHelper {
     }
 
     // 读后感明细 Sheet 列：0=书名,1=成员,2=起始页,3=结束页,4=内容,5=创建时间
-    private static NoteRow parseNoteRow(Row row) {
+    // 服药档案 Sheet 列：0=药品名,1=成员,2=剂量,3=服用时段,4=服用时间,5=备注,6=创建日期
+    private static com.example.healthrecorder.medication.Medication parseMedicationRow(Row row) {
         try {
+            String name = cellToString(row.getCell(0)).trim();
+            if (name.isEmpty()) return null;
+            com.example.healthrecorder.medication.Medication m =
+                    new com.example.healthrecorder.medication.Medication();
+            m.setName(name);
+            m.setUserName(cellToString(row.getCell(1)).trim());
+            String dosage = cellToString(row.getCell(2)).trim();
+            m.setDosage(dosage.isEmpty() ? null : dosage);
+            m.setTiming(com.example.healthrecorder.medication.Medication.parseTiming(
+                    cellToString(row.getCell(3)).trim()));
+            String time = cellToString(row.getCell(4)).trim();
+            m.setTimeText(time.isEmpty() ? null : time);
+            String notes = cellToString(row.getCell(5)).trim();
+            m.setNotes(notes.isEmpty() ? null : notes);
+            String created = cellToString(row.getCell(6)).trim();
+            if (!created.isEmpty()) m.setCreatedAt(parseDate(created));
+            m.setActive(true);
+            return m;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 服药打卡 Sheet 列：0=药品名,1=成员,2=日期,3=是否已服,4=实际服用时间,5=备注
+    private static com.example.healthrecorder.medication.MedicationLog parseMedLogRow(Row row) {
+        try {
+            String name = cellToString(row.getCell(0)).trim();
+            String date = normalizeDayKey(cellToString(row.getCell(2)).trim());
+            if (name.isEmpty() || date.isEmpty()) return null;
+            com.example.healthrecorder.medication.MedicationLog l =
+                    new com.example.healthrecorder.medication.MedicationLog();
+            l.setMedName(name);
+            l.setLogDate(date);
+            String taken = cellToString(row.getCell(3)).trim();
+            l.setTaken(taken.equals("是") || taken.equals("1") || taken.equalsIgnoreCase("true"));
+            String takenAt = cellToString(row.getCell(4)).trim();
+            if (!takenAt.isEmpty()) l.setTakenAt(parseDate(takenAt));
+            String notes = cellToString(row.getCell(5)).trim();
+            l.setNotes(notes.isEmpty() ? null : notes);
+            return l;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static NoteRow parseNoteRow(Row row) {        try {
             String title = cellToString(row.getCell(0)).trim();
             if (title.isEmpty()) return null;
             NoteRow n = new NoteRow();

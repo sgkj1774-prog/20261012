@@ -54,6 +54,9 @@ public class EventListActivity extends AppCompatActivity {
         // 成员管理入口
         findViewById(R.id.btnMembers).setOnClickListener(v ->
                 startActivity(new Intent(ctx, UserManagementActivity.class)));
+        // 服药记录入口
+        findViewById(R.id.btnMedication).setOnClickListener(v ->
+                startActivity(new Intent(ctx, com.example.healthrecorder.medication.MedicationListActivity.class)));
         // 数据统计入口（原数据管理入口已移除）
         findViewById(R.id.btnDataManagement).setOnClickListener(v ->
                 startActivity(new Intent(ctx, EventStatsActivity.class)));

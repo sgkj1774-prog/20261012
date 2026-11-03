@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="#FFFFFF"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginTop="8dp"
+    android:paddingHorizontal="14dp"
+    android:paddingVertical="14dp"
+    android:elevation="1dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvMedName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#333333"/>
+
+            <TextView
+                android:id="@+id/tvMedDosage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="1dp"
+                android:textSize="11sp"
+                android:textColor="#2196F3"
+                android:background="#E3F2FD"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvMedSchedule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="13sp"
+            android:textColor="#666666"/>
+
+        <TextView
+            android:id="@+id/tvMedNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="12sp"
+            android:textColor="#999999"/>
+
+        <TextView
+            android:id="@+id/tvMedStats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textSize="12sp"
+            android:textColor="#999999"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnTake"
+        android:layout_width="88dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="10dp"
+        android:text="标记已服"
+        android:textSize="13sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#BDBDBD"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"/>
+</LinearLayout>

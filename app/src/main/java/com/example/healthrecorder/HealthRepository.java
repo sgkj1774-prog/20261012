@@ -585,6 +585,54 @@ public class HealthRepository {
     }
 
     // ============================================================
+    // 服药档案 / 打卡（v13）
+    // ============================================================
+
+    public java.util.List<com.example.healthrecorder.medication.Medication> getAllMedications() {
+        return mDbHelper.getAllMedications();
+    }
+
+    public com.example.healthrecorder.medication.Medication getMedicationById(int id) {
+        return mDbHelper.getMedicationById(id);
+    }
+
+    public long addMedication(com.example.healthrecorder.medication.Medication m) {
+        return mDbHelper.addMedication(m);
+    }
+
+    public void updateMedication(com.example.healthrecorder.medication.Medication m) {
+        mDbHelper.updateMedication(m);
+    }
+
+    public void deleteMedication(int id) {
+        mDbHelper.deleteMedication(id);
+    }
+
+    public int getMedicationCount() {
+        return mDbHelper.getMedicationCount();
+    }
+
+    public java.util.List<com.example.healthrecorder.medication.MedicationLog> getAllMedicationLogs() {
+        return mDbHelper.getAllMedicationLogs();
+    }
+
+    public java.util.List<com.example.healthrecorder.medication.MedicationLog> getMedicationLogsForMed(int medId, int days) {
+        return mDbHelper.getMedicationLogsForMed(medId, days);
+    }
+
+    public com.example.healthrecorder.medication.MedicationLog getMedicationLog(int medId, String logDate) {
+        return mDbHelper.getMedicationLog(medId, logDate);
+    }
+
+    public void saveMedicationLog(com.example.healthrecorder.medication.MedicationLog l) {
+        mDbHelper.saveMedicationLog(l);
+    }
+
+    public void deleteMedicationLog(int medId, String logDate) {
+        mDbHelper.deleteMedicationLog(medId, logDate);
+    }
+
+    // ============================================================
     // 工具方法
     // ============================================================
     

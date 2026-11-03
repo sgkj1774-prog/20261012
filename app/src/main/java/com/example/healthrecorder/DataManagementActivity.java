@@ -168,8 +168,10 @@ public class DataManagementActivity extends AppCompatActivity {
                 List<com.example.healthrecorder.book.BookRecord> bookRecords = repository.getAllBookRecords();
                 List<com.example.healthrecorder.cat.CatFoodRecord> catFoodRecords = repository.getAllCatFoodRecords();
                 List<com.example.healthrecorder.book.BookNote> bookNotes = repository.getAllBookNotes();
+                List<com.example.healthrecorder.medication.Medication> medications = repository.getAllMedications();
+                List<com.example.healthrecorder.medication.MedicationLog> medLogs = repository.getAllMedicationLogs();
 
-                if (records.isEmpty() && users.isEmpty() && catRecords.isEmpty() && teethRecords.isEmpty() && exerciseRecords.isEmpty() && breathingRecords.isEmpty() && events.isEmpty() && bookRecords.isEmpty() && catFoodRecords.isEmpty()) {
+                if (records.isEmpty() && users.isEmpty() && catRecords.isEmpty() && teethRecords.isEmpty() && exerciseRecords.isEmpty() && breathingRecords.isEmpty() && events.isEmpty() && bookRecords.isEmpty() && catFoodRecords.isEmpty() && medications.isEmpty()) {
                     postOnUi(() -> {
                         progressBarExport.setVisibility(View.GONE);
                         setExportButtonsEnabled(true);
@@ -186,8 +188,8 @@ public class DataManagementActivity extends AppCompatActivity {
                 if (targetFile == null) throw new Exception("创建文件失败");
 
                 byte[] data = format.equals("csv")
-                        ? ExportHelper.buildCsvBytes(records, users, catRecords, teethRecords, exerciseRecords, breathingRecords, events, bookRecords, catFoodRecords, bookNotes)
-                        : ExportHelper.buildExcelBytes(records, users, catRecords, teethRecords, exerciseRecords, breathingRecords, events, bookRecords, catFoodRecords, bookNotes);
+                        ? ExportHelper.buildCsvBytes(records, users, catRecords, teethRecords, exerciseRecords, breathingRecords, events, bookRecords, catFoodRecords, bookNotes, medications, medLogs)
+                        : ExportHelper.buildExcelBytes(records, users, catRecords, teethRecords, exerciseRecords, breathingRecords, events, bookRecords, catFoodRecords, bookNotes, medications, medLogs);
                 if (data == null || data.length == 0) throw new Exception("内容生成失败（空数据）");
 
                 Uri fileUri = targetFile.getUri();
@@ -245,7 +247,7 @@ public class DataManagementActivity extends AppCompatActivity {
                 ImportHelper.ImportResult result = ImportHelper.parseFile(is, fileName);
                 is.close();
 
-                if (result.records.isEmpty() && result.users.isEmpty() && result.catRecords.isEmpty() && result.teethRecords.isEmpty() && result.exerciseRecords.isEmpty() && result.breathingRecords.isEmpty() && result.events.isEmpty() && result.bookRecords.isEmpty() && result.catFoodRecords.isEmpty()) {
+                if (result.records.isEmpty() && result.users.isEmpty() && result.catRecords.isEmpty() && result.teethRecords.isEmpty() && result.exerciseRecords.isEmpty() && result.breathingRecords.isEmpty() && result.events.isEmpty() && result.bookRecords.isEmpty() && result.catFoodRecords.isEmpty() && result.medications.isEmpty()) {
                     postOnUi(() -> {
                         progressBarImport.setVisibility(View.GONE);
                         setImportButtonsEnabled(true);
@@ -264,13 +266,15 @@ public class DataManagementActivity extends AppCompatActivity {
                 int evc = result.events.size();
                 int bkc = result.bookRecords.size();
                 int cfc = result.catFoodRecords.size();
+                final int mdc = result.medications.size();
+                final int mlc = result.medicationLogs.size();
                 int sk = result.skippedLines;
                 postOnUi(() -> {
                     progressBarImport.setVisibility(View.GONE);
                     setImportButtonsEnabled(true);
                     String msg = String.format(Locale.getDefault(),
-                            "解析完成！\n\n健康 %d | 成员 %d | 猫咪 %d | 刷牙 %d | 运动 %d\n呼吸 %d | 事项 %d | 读书 %d | 猫粮 %d\n跳过 %d 行无效数据\n\n导入方式：合并（按姓名匹配成员，重复记录自动跳过）",
-                            rc, uc, cc, tc, ec, bc, evc, bkc, cfc, sk);
+                            "解析完成！\n\n健康 %d | 成员 %d | 猫咪 %d | 刷牙 %d | 运动 %d\n呼吸 %d | 事项 %d | 读书 %d | 猫粮 %d\n服药档案 %d | 服药打卡 %d\n跳过 %d 行无效数据\n\n导入方式：合并（按姓名匹配成员，重复记录自动跳过）",
+                            rc, uc, cc, tc, ec, bc, evc, bkc, cfc, mdc, mlc, sk);
                     new AlertDialog.Builder(DataManagementActivity.this)
                             .setTitle("📥 确认导入")
                             .setMessage(msg)
@@ -402,16 +406,41 @@ public class DataManagementActivity extends AppCompatActivity {
                     catFoodInserted++;
                 }
 
+                // 10) 还原服药档案
+                int medInserted = 0;
+                java.util.Map<String, Integer> medNameToId = new java.util.HashMap<>();
+                for (com.example.healthrecorder.medication.Medication md : result.medications) {
+                    Integer uid = nameToId.get(md.getUserName());
+                    md.setUserId(uid != null ? uid : 1);
+                    long newId = repository.addMedication(md);
+                    medNameToId.put(md.getName(), (int) newId);
+                    medInserted++;
+                }
+
+                // 11) 还原服药打卡（按「药品名」关联刚插入的档案）
+                int medLogInserted = 0;
+                for (com.example.healthrecorder.medication.MedicationLog ml : result.medicationLogs) {
+                    Integer medId = medNameToId.get(ml.getMedName());
+                    if (medId == null) continue;   // 档案缺失则跳过，避免挂到错药上
+                    ml.setId(0);
+                    ml.setMedId(medId);
+                    if (ml.getUserId() <= 0) ml.setUserId(1);
+                    repository.saveMedicationLog(ml);
+                    medLogInserted++;
+                }
+
                 final int fInserted = inserted, fSkipped = skipped, fDup = dup, fUsers = usersAdded;
                 final int fCat = catInserted, fTeeth = teethInserted, fEx = exerciseInserted;
                 final int fBreath = breathingInserted, fEvent = eventInserted, fBook = bookInserted, fCatFood = catFoodInserted;
                 final int fBookNotes = bookNotesInserted;
+                final int fMed = medInserted, fMedLog = medLogInserted;
                 postOnUi(() -> {
                     progressBarImport.setVisibility(View.GONE);
                     setImportButtonsEnabled(true);
                     textStatusImport.setText(String.format(Locale.getDefault(),
-                            "✓ 导入完成！\n新增成员 %d 个\n健康 %d | 猫咪 %d | 刷牙 %d | 运动 %d\n呼吸 %d | 事项 %d | 读书 %d（段落读后感 %d） | 猫粮 %d\n跳过空记录：%d 条 | 重复跳过 %d 条",
-                            fUsers, fInserted, fCat, fTeeth, fEx, fBreath, fEvent, fBook, fBookNotes, fCatFood, fSkipped, fDup));
+                            "✓ 导入完成！\n新增成员 %d 个\n健康 %d | 猫咪 %d | 刷牙 %d | 运动 %d\n呼吸 %d | 事项 %d | 读书 %d（段落读后感 %d） | 猫粮 %d\n服药档案 %d | 服药打卡 %d\n跳过空记录：%d 条 | 重复跳过 %d 条",
+                            fUsers, fInserted, fCat, fTeeth, fEx, fBreath, fEvent, fBook, fBookNotes, fCatFood,
+                            fMed, fMedLog, fSkipped, fDup));
                     Toast.makeText(this, "已导入 " + fInserted + " 条记录", Toast.LENGTH_SHORT).show();
                 });
             } catch (Exception e) {

@@ -7,6 +7,8 @@ import com.example.healthrecorder.cat.CatFoodRecord;
 import com.example.healthrecorder.cat.CatRecord;
 import com.example.healthrecorder.event.Event;
 import com.example.healthrecorder.exercise.ExerciseRecord;
+import com.example.healthrecorder.medication.Medication;
+import com.example.healthrecorder.medication.MedicationLog;
 import com.example.healthrecorder.teeth.TeethRecord;
 
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -34,7 +36,9 @@ public class ExportHelper {
                                         List<Event> events,
                                         List<BookRecord> bookRecords,
                                         List<CatFoodRecord> catFoodRecords,
-                                        List<BookNote> bookNotes) throws Exception {
+                                        List<BookNote> bookNotes,
+                                        List<Medication> medications,
+                                        List<MedicationLog> medLogs) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(baos, "UTF-8"));
         writer.write("\uFEFF");
@@ -229,6 +233,52 @@ public class ExportHelper {
             }
         }
 
+        // ── 服药档案（v13）──────────────────────────────────────────
+        writer.write("=== 服药档案 ===");
+        writer.newLine();
+        writer.write("药品名,成员,剂量,服用时段,服用时间,备注,创建日期");
+        writer.newLine();
+        if (medications != null) {
+            for (Medication m : medications) {
+                String userName = m.getUserName() != null ? m.getUserName() : "本人";
+                String notes = m.getNotes() != null ? m.getNotes().replace("\r", "") : "";
+                writer.write(String.format(Locale.US, "%s,%s,%s,%s,%s,%s,%s",
+                        escapeCsv(m.getName()), escapeCsv(userName),
+                        escapeCsv(m.getDosage()),
+                        Medication.timingText(m.getTiming()),
+                        m.getTimeText() != null ? m.getTimeText() : "",
+                        escapeCsv(notes),
+                        m.getCreatedAt() != null ? DATE_FORMAT.format(m.getCreatedAt()) : ""));
+                writer.newLine();
+            }
+        }
+        writer.newLine();
+
+        // ── 服药打卡（v13）──────────────────────────────────────────
+        writer.write("=== 服药打卡 ===");
+        writer.newLine();
+        writer.write("药品名,成员,日期,是否已服,实际服用时间,备注");
+        writer.newLine();
+        if (medLogs != null && medications != null) {
+            java.util.Map<Integer, Medication> medById = new java.util.HashMap<>();
+            for (Medication m : medications) medById.put(m.getId(), m);
+            for (MedicationLog l : medLogs) {
+                Medication owner = medById.get(l.getMedId());
+                String medName = owner != null ? owner.getName() : l.getMedName();
+                if (medName == null) continue;
+                String userName = owner != null && owner.getUserName() != null
+                        ? owner.getUserName() : "本人";
+                String notes = l.getNotes() != null ? l.getNotes().replace("\r", "") : "";
+                writer.write(String.format(Locale.US, "%s,%s,%s,%s,%s,%s",
+                        escapeCsv(medName), escapeCsv(userName),
+                        l.getLogDate() != null ? l.getLogDate() : "",
+                        l.isTaken() ? "是" : "否",
+                        l.getTakenAt() != null ? DATE_FORMAT.format(l.getTakenAt()) : "",
+                        escapeCsv(notes)));
+                writer.newLine();
+            }
+        }
+
         writer.flush();
         return baos.toByteArray();
     }
@@ -241,7 +291,9 @@ public class ExportHelper {
                                           List<Event> events,
                                           List<BookRecord> bookRecords,
                                           List<CatFoodRecord> catFoodRecords,
-                                          List<BookNote> bookNotes) throws Exception {
+                                          List<BookNote> bookNotes,
+                                          List<Medication> medications,
+                                          List<MedicationLog> medLogs) throws Exception {
         Workbook workbook = new XSSFWorkbook();
 
         Sheet userSheet = workbook.createSheet("人员配置");
@@ -508,6 +560,62 @@ public class ExportHelper {
         noteSheet.setColumnWidth(4, 40 * 256);
         noteSheet.setColumnWidth(5, 18 * 256);
 
+        // ── 服药档案 Sheet（v13）────────────────────────────────────
+        Sheet medSheet = workbook.createSheet("服药档案");
+        String[] medHeaders = {"药品名","成员","剂量","服用时段","服用时间","备注","创建日期"};
+        Row medHeaderRow = medSheet.createRow(0);
+        for (int i = 0; i < medHeaders.length; i++) medHeaderRow.createCell(i).setCellValue(medHeaders[i]);
+        int medRow = 1;
+        if (medications != null) {
+            for (Medication m : medications) {
+                Row row = medSheet.createRow(medRow++);
+                row.createCell(0).setCellValue(m.getName() != null ? m.getName() : "");
+                row.createCell(1).setCellValue(m.getUserName() != null ? m.getUserName() : "本人");
+                row.createCell(2).setCellValue(m.getDosage() != null ? m.getDosage() : "");
+                row.createCell(3).setCellValue(Medication.timingText(m.getTiming()));
+                row.createCell(4).setCellValue(m.getTimeText() != null ? m.getTimeText() : "");
+                row.createCell(5).setCellValue(m.getNotes() != null ? m.getNotes() : "");
+                row.createCell(6).setCellValue(m.getCreatedAt() != null ? DATE_FORMAT.format(m.getCreatedAt()) : "");
+            }
+        }
+        medSheet.setColumnWidth(0, 16 * 256);
+        medSheet.setColumnWidth(1, 8 * 256);
+        medSheet.setColumnWidth(2, 10 * 256);
+        medSheet.setColumnWidth(3, 10 * 256);
+        medSheet.setColumnWidth(4, 10 * 256);
+        medSheet.setColumnWidth(5, 30 * 256);
+        medSheet.setColumnWidth(6, 18 * 256);
+
+        // ── 服药打卡 Sheet（v13）────────────────────────────────────
+        Sheet medLogSheet = workbook.createSheet("服药打卡");
+        String[] medLogHeaders = {"药品名","成员","日期","是否已服","实际服用时间","备注"};
+        Row medLogHeaderRow = medLogSheet.createRow(0);
+        for (int i = 0; i < medLogHeaders.length; i++) medLogHeaderRow.createCell(i).setCellValue(medLogHeaders[i]);
+        int medLogRow = 1;
+        if (medLogs != null && medications != null) {
+            java.util.Map<Integer, Medication> medById = new java.util.HashMap<>();
+            for (Medication m : medications) medById.put(m.getId(), m);
+            for (MedicationLog l : medLogs) {
+                Medication owner = medById.get(l.getMedId());
+                String medName = owner != null ? owner.getName() : l.getMedName();
+                if (medName == null) continue;
+                Row row = medLogSheet.createRow(medLogRow++);
+                row.createCell(0).setCellValue(medName);
+                row.createCell(1).setCellValue(owner != null && owner.getUserName() != null
+                        ? owner.getUserName() : "本人");
+                row.createCell(2).setCellValue(l.getLogDate() != null ? l.getLogDate() : "");
+                row.createCell(3).setCellValue(l.isTaken() ? "是" : "否");
+                row.createCell(4).setCellValue(l.getTakenAt() != null ? DATE_FORMAT.format(l.getTakenAt()) : "");
+                row.createCell(5).setCellValue(l.getNotes() != null ? l.getNotes() : "");
+            }
+        }
+        medLogSheet.setColumnWidth(0, 16 * 256);
+        medLogSheet.setColumnWidth(1, 8 * 256);
+        medLogSheet.setColumnWidth(2, 12 * 256);
+        medLogSheet.setColumnWidth(3, 10 * 256);
+        medLogSheet.setColumnWidth(4, 18 * 256);
+        medLogSheet.setColumnWidth(5, 30 * 256);
+
         Font headerFont = workbook.createFont();
         headerFont.setBold(true);
         CellStyle headerStyle = workbook.createCellStyle();
@@ -522,6 +630,8 @@ public class ExportHelper {
         bookSheet.getRow(0).setRowStyle(headerStyle);
         catFoodSheet.getRow(0).setRowStyle(headerStyle);
         noteSheet.getRow(0).setRowStyle(headerStyle);
+        medSheet.getRow(0).setRowStyle(headerStyle);
+        medLogSheet.getRow(0).setRowStyle(headerStyle);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(16384);
         workbook.write(baos);
@@ -539,9 +649,9 @@ public class ExportHelper {
     }
 
     public static byte[] buildCsvBytes(List<Record> records, List<User> users) throws Exception {
-        return buildCsvBytes(records, users, null, null, null, null, null, null, null, null);
+        return buildCsvBytes(records, users, null, null, null, null, null, null, null, null, null, null);
     }
     public static byte[] buildExcelBytes(List<Record> records, List<User> users) throws Exception {
-        return buildExcelBytes(records, users, null, null, null, null, null, null, null, null);
+        return buildExcelBytes(records, users, null, null, null, null, null, null, null, null, null, null);
     }
 }

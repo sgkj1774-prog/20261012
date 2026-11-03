@@ -49,6 +49,35 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="V1.4.11"
+                android:textSize="16sp"
+                android:textColor="#212121"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2026-11-03"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 重要事项新增「服药记录」：可建药品档案（药名、剂量、服用时段、具体时间）\n• 服药记录支持每日打卡，一键标记已服/取消，并统计近 7 天已服与漏服天数\n• 导出导入新增「服药档案」「服药打卡」两段，旧备份仍可正常导入\n• 数据库升级到 v13"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="V1.4.10"
                 android:textSize="16sp"
                 android:textColor="#212121"
